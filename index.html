@@ -16,7 +16,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 28px;
+            gap: 24px;
             box-sizing: border-box;
         }
 
@@ -179,6 +179,100 @@
         }
 
         /* =======================================
+           [검색 및 정렬 바 스타일]
+        ======================================= */
+        .search-sort-bar {
+            max-width: 1100px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            box-sizing: border-box;
+        }
+
+        .search-box-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            font-size: 16px;
+            color: #ff758f;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 42px;
+            border-radius: 12px;
+            border: 1.5px solid #ffccd5;
+            background-color: #ffffff;
+            font-size: 14px;
+            color: #4a4a4a;
+            outline: none;
+            box-shadow: 0 4px 10px rgba(255, 117, 143, 0.06);
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: #ff758f;
+            box-shadow: 0 4px 12px rgba(255, 117, 143, 0.18);
+        }
+
+        .sort-btn-group {
+            display: flex;
+            gap: 6px;
+            background: #ffffff;
+            padding: 4px;
+            border-radius: 12px;
+            border: 1.5px solid #ffccd5;
+            box-shadow: 0 4px 10px rgba(255, 117, 143, 0.06);
+            flex-shrink: 0;
+        }
+
+        .sort-btn {
+            border: none;
+            background: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #888888;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .sort-btn:hover {
+            color: #c9184a;
+            background-color: #fff0f3;
+        }
+
+        .sort-btn.active {
+            background-color: #ff758f;
+            color: #ffffff;
+        }
+
+        /* 검색 결과 없음 문구 */
+        .no-result-msg {
+            background: #ffffff;
+            max-width: 1100px;
+            width: 100%;
+            padding: 40px 20px;
+            border-radius: 20px;
+            border: 1px dashed #ffccd5;
+            text-align: center;
+            color: #888888;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+
+        /* =======================================
            [도장판 영역 스타일]
         ======================================= */
         .board-header {
@@ -212,7 +306,7 @@
             gap: 8px;
         }
 
-        /* [1. 일반 미달성 빈 칸: 은은한 연분홍 테두리 & 배경] */
+        /* [일반 미달성 빈 칸: 은은한 연분홍] */
         .stamp-btn {
             position: relative;
             aspect-ratio: 1 / 1;
@@ -234,7 +328,7 @@
             border-color: #ffccd5;
         }
 
-        /* [2. 3의 배수 미달성 빈 칸: 은은한 연초코 테두리 & 배경] */
+        /* [3의 배수 미달성 빈 칸: 은은한 연초코] */
         .stamp-btn.special {
             background-color: #faf7f5;
             border: 1.5px solid #ede0d4;
@@ -252,13 +346,13 @@
             pointer-events: none;
         }
 
-        /* [3. 도장 획득 상태 (일반 - 분홍색)] */
+        /* [도장 획득 상태 (일반 - 분홍색)] */
         .stamp-btn.active {
             background-color: #ffe5ec;
             border: 2px solid #ff8fa3;
         }
 
-        /* [4. 도장 획득 상태 (3의 배수 보상 칸 - 초코색)] */
+        /* [도장 획득 상태 (3의 배수 보상 칸 - 초코색)] */
         .stamp-btn.active.special {
             background-color: #ede0d4;
             border: 2px solid #b08968;
@@ -270,20 +364,20 @@
             bottom: 3px;
             right: 5px;
             font-size: 10px;
-            color: #c9a9b0; /* 미달성 일반 칸 번호: 부드러운 핑크빛 회색 */
+            color: #c9a9b0;
             font-weight: 600;
         }
 
         .stamp-btn.special .stamp-number {
-            color: #bfaea2; /* 미달성 특별 칸 번호: 부드러운 밀크초코빛 회색 */
+            color: #bfaea2;
         }
 
         .stamp-btn.active .stamp-number {
-            color: #c9184a; /* 활성화 일반 칸 번호: 딥 핑크 */
+            color: #c9184a;
         }
 
         .stamp-btn.active.special .stamp-number {
-            color: #6f4518; /* 활성화 특별 칸 번호: 딥 초콜릿 */
+            color: #6f4518;
         }
 
         /* =======================================
@@ -401,7 +495,7 @@
         @media (max-width: 768px) {
             body {
                 padding: 24px 12px;
-                gap: 20px;
+                gap: 16px;
             }
 
             .container, .board-card, .goods-card {
@@ -411,6 +505,24 @@
 
             h1 {
                 font-size: 22px;
+            }
+
+            /* 검색바 세로 또는 콤팩트 가로 배치 */
+            .search-sort-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .sort-btn-group {
+                width: 100%;
+                justify-content: space-between;
+                box-sizing: border-box;
+            }
+
+            .sort-btn {
+                flex: 1;
+                padding: 8px 6px;
+                text-align: center;
             }
 
             .goods-grid {
@@ -433,14 +545,12 @@
 </head>
 <body>
 
-    <!-- 1. 상단 프로필/배너 메인 보드 -->
     <div class="container">
         <img src="my-image.png" alt="프로필 사진" class="profile-img">
         <h1>다정현 핫클립 저장소</h1>
         <p style="margin: 0; color: #666; font-size: 15px;">원하는 도장을 클릭하여 상세 클립 정보를 확인하세요.</p>
     </div>
 
-    <!-- 2. 핫클립 굿즈 안내 박스 -->
     <div class="goods-card">
         <div class="goods-header">
             <h2 class="goods-title">🎁 핫클립 굿즈 안내</h2>
@@ -458,10 +568,20 @@
         <p class="goods-footer-msg">항상 클립 따주셔서 정말 감사합니다 💖 작게나마 보답이 되었으면 좋겠습니다!</p>
     </div>
 
-    <!-- 3. 도장판 목록 영역 -->
+    <div class="search-sort-bar">
+        <div class="search-box-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="nickname-search" class="search-input" placeholder="닉네임 검색" oninput="handleSearch()">
+        </div>
+        <div class="sort-btn-group">
+            <button class="sort-btn active" id="sort-default" onclick="setSortMode('default')">번호순</button>
+            <button class="sort-btn" id="sort-name" onclick="setSortMode('name')">가나다순</button>
+            <button class="sort-btn" id="sort-stamps" onclick="setSortMode('stamps')">도장순</button>
+        </div>
+    </div>
+
     <div id="boards-container" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 24px;"></div>
 
-    <!-- 4. 상세 정보 모달 창 -->
     <div class="modal-overlay" id="info-modal" onclick="closeModal(event)">
         <div class="modal-box" onclick="event.stopPropagation()">
             <div class="modal-header-row">
@@ -489,7 +609,6 @@
         </div>
     </div>
 
-    <!-- [스크립트 로직] -->
     <script>
         const goodsList = [
             { id: 1, name: "다정현 손편지", desc: "보상사용 할까말까 고민되는군요", img: "gift1.png", isSpecial: false },
@@ -559,22 +678,71 @@
             "2-3": { date: "2026. 8. 31.", text: "26.08 [T1] 버른살의 애교", url: "https://chzzk.naver.com/clips/iam0ruNKlk" }
         };
 
-        function initBoards() {
+        // ========================================================
+        // [검색 및 정렬 로직]
+        // ========================================================
+        let currentSortMode = 'default';
+        let searchQuery = '';
+
+        function setSortMode(mode) {
+            currentSortMode = mode;
+            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`sort-${mode}`).classList.add('active');
+            renderFilteredBoards();
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('nickname-search').value.trim().toLowerCase();
+            renderFilteredBoards();
+        }
+
+        function renderFilteredBoards() {
             const container = document.getElementById("boards-container");
             container.innerHTML = "";
 
+            // 도장판 데이터 리스트 구성
+            let list = [];
             for (let b = 1; b <= totalBoards; b++) {
+                list.push({
+                    id: b,
+                    name: boardNames[b] || `도장판 #${b}`,
+                    count: boardActiveCounts[b] || 0
+                });
+            }
+
+            // 검색어 필터링
+            if (searchQuery) {
+                list = list.filter(item => item.name.toLowerCase().includes(searchQuery));
+            }
+
+            // 정렬 처리
+            if (currentSortMode === 'name') {
+                list.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+            } else if (currentSortMode === 'stamps') {
+                list.sort((a, b) => b.count - a.count || a.id - b.id);
+            } else {
+                list.sort((a, b) => a.id - b.id);
+            }
+
+            // 검색 결과 없을 때 안내
+            if (list.length === 0) {
+                const noResult = document.createElement("div");
+                noResult.className = "no-result-msg";
+                noResult.textContent = `'${searchQuery}' 검색 결과와 일치하는 도장판이 없습니다.`;
+                container.appendChild(noResult);
+                return;
+            }
+
+            // 필터/정렬된 리스트 렌더링
+            list.forEach(item => {
                 const card = document.createElement("div");
                 card.className = "board-card";
-
-                const activeCount = boardActiveCounts[b] || 0;
-                const currentBoardTitle = boardNames[b] || `도장판 #${b}`;
 
                 const header = document.createElement("div");
                 header.className = "board-header";
                 header.innerHTML = `
-                    <h2 class="board-title">${currentBoardTitle}</h2>
-                    <span class="board-badge">도장 ${activeCount} / ${stampsPerBoard}개</span>
+                    <h2 class="board-title">${item.name}</h2>
+                    <span class="board-badge">도장 ${item.count} / ${stampsPerBoard}개</span>
                 `;
                 card.appendChild(header);
 
@@ -589,20 +757,20 @@
                         btn.classList.add("special");
                     }
 
-                    if (s <= activeCount) {
+                    if (s <= item.count) {
                         btn.classList.add("active");
                         btn.innerHTML = `<img src="Jerry.png" alt="도장" class="stamp-icon"><span class="stamp-number">${s}</span>`;
                     } else {
                         btn.innerHTML = `<span class="stamp-number">${s}</span>`;
                     }
 
-                    btn.onclick = () => openModal(b, s, activeCount);
+                    btn.onclick = () => openModal(item.id, s, item.count);
                     grid.appendChild(btn);
                 }
 
                 card.appendChild(grid);
                 container.appendChild(card);
-            }
+            });
         }
 
         function openModal(boardIndex, stampIndex, activeCount) {
@@ -649,7 +817,7 @@
 
         window.addEventListener("DOMContentLoaded", () => {
             renderGoods();
-            initBoards();
+            renderFilteredBoards();
         });
     </script>
 </body>
