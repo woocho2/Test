@@ -14,10 +14,10 @@
             margin: 0;
             padding: 50px 20px 100px;
             box-sizing: border-box;
-            overflow-y: scroll; /* 스크롤바 생성/제거로 인한 가로 떨림 방지 */
+            overflow-y: scroll;
         }
 
-        /* [공통 카드 컨테이너 스타일 - margin: 0 auto 24px로 중앙 정렬] */
+        /* [공통 카드 컨테이너 스타일] */
         .container, .board-card, .goods-card {
             background: #ffffff;
             max-width: 1100px;
@@ -189,9 +189,9 @@
             gap: 16px;
             box-sizing: border-box;
             position: sticky;
-            top: 15px; /* 스크롤 내려도 상단에 안정적으로 안착 */
+            top: 15px;
             z-index: 100;
-            background-color: #fff0f3; /* 배경 비침 방지 */
+            background-color: #fff0f3;
             padding: 6px 0;
         }
 
@@ -262,12 +262,11 @@
             color: #ffffff;
         }
 
-        /* 도장판 컨테이너 영역 */
         #boards-container {
             max-width: 1100px;
             width: 100%;
             margin: 0 auto;
-            min-height: 70vh; /* 검색 결과가 0~1개여도 높이를 유지해 흔들림 방지 */
+            min-height: 70vh;
         }
 
         .no-result-msg {
@@ -552,7 +551,7 @@
 </head>
 <body>
 
-    <!-- 1. 상단 프로필/배너 메인 보드 -->
+    <!-- 1. 상단 배너 메인 보드 -->
     <div class="container">
         <img src="my-image.png" alt="프로필 사진" class="profile-img">
         <h1>다정현 핫클립 저장소</h1>
@@ -577,16 +576,16 @@
         <p class="goods-footer-msg">항상 클립 따주셔서 정말 감사합니다 💖 작게나마 보답이 되었으면 좋겠습니다!</p>
     </div>
 
-    <!-- 3. 닉네임 검색 및 정렬 바 (상단 고정) -->
+    <!-- 3. 닉네임 검색 및 정렬 바 (가나다순 / 도장순 / 최신순) -->
     <div class="search-sort-bar">
         <div class="search-box-wrapper">
             <span class="search-icon">🔍</span>
             <input type="text" id="nickname-search" class="search-input" placeholder="닉네임 검색" oninput="handleSearch()">
         </div>
         <div class="sort-btn-group">
-            <button class="sort-btn active" id="sort-default" onclick="setSortMode('default')">번호순</button>
-            <button class="sort-btn" id="sort-name" onclick="setSortMode('name')">가나다순</button>
+            <button class="sort-btn active" id="sort-name" onclick="setSortMode('name')">가나다순</button>
             <button class="sort-btn" id="sort-stamps" onclick="setSortMode('stamps')">도장순</button>
+            <button class="sort-btn" id="sort-latest" onclick="setSortMode('latest')">최신순</button>
         </div>
     </div>
 
@@ -694,7 +693,7 @@
         };
 
         const boardElementsMap = {};
-        let currentSortMode = 'default';
+        let currentSortMode = 'name'; // 기본 정렬: 가나다순
         let searchQuery = '';
 
         function createAllBoards() {
@@ -766,12 +765,13 @@
             
             let list = Object.values(boardElementsMap);
 
+            // [정렬 로직: 가나다순 / 도장순 / 최신순]
             if (currentSortMode === 'name') {
                 list.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
             } else if (currentSortMode === 'stamps') {
-                list.sort((a, b) => b.count - a.count || a.id - b.id);
-            } else {
-                list.sort((a, b) => a.id - b.id);
+                list.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'ko'));
+            } else if (currentSortMode === 'latest') {
+                list.sort((a, b) => b.id - a.id); // 최신 등록순 (번호 역순)
             }
 
             let visibleCount = 0;
