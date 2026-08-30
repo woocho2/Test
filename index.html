@@ -177,22 +177,27 @@
         }
 
         /* =======================================
-           [검색 및 정렬 바 - 상단 Sticky 고정]
+           [검색 및 정렬 바 - 상단 Sticky 및 배경 차단 개선]
         ======================================= */
+        .search-sort-bar-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: #fff0f3; /* 페이지 배경과 완벽 일치 */
+            width: 100%;
+            padding: 16px 0; /* 위아래 넉넉하게 덮어주어 틈새 투명 차단 */
+            margin-bottom: 8px;
+        }
+
         .search-sort-bar {
             max-width: 1100px;
             width: 100%;
-            margin: 0 auto 24px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 16px;
             box-sizing: border-box;
-            position: sticky;
-            top: 15px;
-            z-index: 100;
-            background-color: #fff0f3;
-            padding: 6px 0;
         }
 
         .search-box-wrapper {
@@ -512,11 +517,14 @@
                 font-size: 22px;
             }
 
+            .search-sort-bar-wrapper {
+                padding: 10px 0;
+                margin-bottom: 12px;
+            }
+
             .search-sort-bar {
                 flex-direction: column;
                 gap: 10px;
-                top: 10px;
-                margin-bottom: 16px;
             }
 
             .sort-btn-group {
@@ -574,15 +582,17 @@
         <p class="goods-footer-msg">항상 클립 따주셔서 정말 감사합니다 💖 작게나마 보답이 되었으면 좋겠습니다!</p>
     </div>
 
-    <div class="search-sort-bar">
-        <div class="search-box-wrapper">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="nickname-search" class="search-input" placeholder="닉네임 검색" oninput="handleSearch()">
-        </div>
-        <div class="sort-btn-group">
-            <button class="sort-btn active" id="sort-name" onclick="setSortMode('name')">가나다순</button>
-            <button class="sort-btn" id="sort-stamps" onclick="setSortMode('stamps')">도장순</button>
-            <button class="sort-btn" id="sort-latest" onclick="setSortMode('latest')">최신순</button>
+    <div class="search-sort-bar-wrapper">
+        <div class="search-sort-bar">
+            <div class="search-box-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="nickname-search" class="search-input" placeholder="닉네임 검색" oninput="handleSearch()">
+            </div>
+            <div class="sort-btn-group">
+                <button class="sort-btn active" id="sort-name" onclick="setSortMode('name')">가나다순</button>
+                <button class="sort-btn" id="sort-stamps" onclick="setSortMode('stamps')">도장순</button>
+                <button class="sort-btn" id="sort-latest" onclick="setSortMode('latest')">최신순</button>
+            </div>
         </div>
     </div>
 
@@ -690,7 +700,6 @@
         let currentSortMode = 'name';
         let searchQuery = '';
 
-        // 날짜 문자열("2026. 8. 31.")을 비교 가능한 타임스탬프 숫자로 변환하는 헬퍼 함수
         function parseStampDate(dateStr) {
             if (!dateStr || dateStr.includes("없음")) return 0;
             const parts = dateStr.replace(/\s+/g, '').replace(/\.$/, '').split('.');
@@ -703,11 +712,8 @@
             return 0;
         }
 
-        // 각 도장판에서 가장 마지막(최신)으로 찍힌 도장의 날짜 타임스탬프 계산
         function getLatestStampTimestamp(boardId, activeCount) {
             if (activeCount <= 0) return 0;
-            
-            // 마지막 도장부터 역순으로 날짜가 등록된 도장 탐색
             for (let s = activeCount; s >= 1; s--) {
                 const key = `${boardId}-${s}`;
                 if (stampData[key] && stampData[key].date) {
@@ -765,7 +771,7 @@
                     id: b,
                     name: name,
                     count: count,
-                    latestTime: getLatestStampTimestamp(b, count) // 최신 날짜 타임스탬프 저장
+                    latestTime: getLatestStampTimestamp(b, count)
                 };
             }
         }
@@ -788,13 +794,11 @@
             
             let list = Object.values(boardElementsMap);
 
-            // [정렬 로직]
             if (currentSortMode === 'name') {
                 list.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
             } else if (currentSortMode === 'stamps') {
                 list.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'ko'));
             } else if (currentSortMode === 'latest') {
-                // 최근 날짜순(내림차순) -> 날짜가 같으면 도장 개수 많은 순 -> 이름순
                 list.sort((a, b) => b.latestTime - a.latestTime || b.count - a.count || a.name.localeCompare(b.name, 'ko'));
             }
 
