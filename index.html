@@ -12,113 +12,236 @@
             background-color: #fff0f3;
             color: #4a4a4a;
             margin: 0;
-            padding: 60px 20px; /* 상하 여백 확대 */
+            padding: 40px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 30px;          /* 카드 사이 간격 확대 */
+            gap: 24px;
         }
 
-        /* [메인 카드 스타일] */
-        .container {
+        /* [공통 카드 컨테이너] */
+        .container, .sub-container {
             background: #ffffff;
-            max-width: 900px;   /* 너비 확장 (기존 600px -> 900px) */
+            max-width: 900px;
             width: 100%;
-            padding: 45px;      /* 내부 여백 확장 */
+            padding: 35px 40px;
             border-radius: 20px;
             border: 1px solid #ffccd5;
-            box-shadow: 0 10px 25px rgba(255, 117, 143, 0.15);
-            text-align: center;
+            box-shadow: 0 8px 20px rgba(255, 117, 143, 0.12);
             box-sizing: border-box;
         }
 
-        /* [이미지 스타일] */
+        .container {
+            text-align: center;
+        }
+
+        /* [상단 프로필/배너 이미지] */
         .profile-img {
             max-width: 100%;
             height: auto;
             display: block;
-            margin: 0 auto 24px;
+            margin: 0 auto 20px;
             border-radius: 16px;
             border: 4px solid #ff758f;
         }
 
-        /* [메인 제목 폰트 확대] */
         h1 {
-            font-size: 32px;
-            margin-bottom: 12px;
+            font-size: 28px;
+            margin-bottom: 8px;
             color: #c9184a;
-        }
-
-        /* [본문 텍스트 확대] */
-        p {
-            font-size: 18px;
-            line-height: 1.6;
-            color: #595959;
-            margin-bottom: 28px;
-        }
-
-        /* [버튼 크기 확대] */
-        .action-button {
-            background-color: #ff758f;
-            color: #ffffff;
-            border: none;
-            padding: 14px 36px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-
-        .action-button:hover {
-            background-color: #ff4d6d;
-        }
-
-        .action-button:active {
-            transform: scale(0.98);
-        }
-
-        #result-text {
-            margin-top: 24px;
-            font-size: 18px;
-            font-weight: 600;
-            color: #a4133c;
-        }
-
-        /* [하단 서브 카드 스타일] */
-        .sub-container {
-            background: #ffffff;
-            max-width: 900px;   /* 너비 일치 */
-            width: 100%;
-            padding: 35px 45px;
-            border-radius: 20px;
-            border: 1px solid #ffccd5;
-            box-shadow: 0 6px 20px rgba(255, 117, 143, 0.1);
-            box-sizing: border-box;
         }
 
         .sub-title {
-            font-size: 22px;
+            font-size: 20px;
             color: #c9184a;
-            margin: 0 0 20px 0;
-            padding-bottom: 10px;
+            margin: 0 0 16px 0;
+            padding-bottom: 8px;
             border-bottom: 2px solid #fff0f3;
         }
 
+        /* =======================================
+           [도장판 (Stamp Grid) 스타일]
+        ======================================= */
+        .stamp-board-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .stamp-count-badge {
+            font-size: 14px;
+            color: #ff4d6d;
+            font-weight: bold;
+            background-color: #fff0f3;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .stamp-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr); /* 가로 10개 */
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        /* 반응형: 화면이 좁아지면 가로 개수 자동 조절 */
+        @media (max-width: 768px) {
+            .stamp-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        /* 개별 도장 버튼 */
+        .stamp-btn {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            background-color: #f0f7ff;
+            border: 2px solid #b9dcff;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.15s ease-in-out;
+            font-size: 18px;
+            color: #2b7fff;
+            padding: 0;
+        }
+
+        .stamp-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 특별 보상 칸 (3의 배수) */
+        .stamp-btn.special {
+            background-color: #fff8e6;
+            border: 2px solid #ffd166;
+            color: #f77f00;
+        }
+
+        /* 아직 열리지 않은 빈 칸 */
+        .stamp-btn.empty {
+            background-color: #fafafa;
+            border: 2px solid #eeeeee;
+            color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* 도장 우측 하단 번호 */
+        .stamp-number {
+            position: absolute;
+            bottom: 4px;
+            right: 6px;
+            font-size: 10px;
+            color: #888888;
+        }
+
+        /* =======================================
+           [팝업 모달 (Modal Popup) 스타일]
+        ======================================= */
+        .modal-overlay {
+            display: none; /* 기본 숨김 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .modal-box {
+            background: #ffffff;
+            max-width: 420px;
+            width: 100%;
+            border-radius: 18px;
+            padding: 28px;
+            border: 1px solid #ffccd5;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: relative;
+            animation: modalFadeIn 0.2s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            color: #c9184a;
+            margin-bottom: 6px;
+        }
+
+        .modal-date {
+            font-size: 13px;
+            color: #888888;
+            margin-bottom: 16px;
+        }
+
+        .modal-info {
+            font-size: 15px;
+            color: #444444;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            background-color: #fff0f3;
+            padding: 14px;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .modal-link-btn {
+            display: inline-block;
+            background-color: #ff758f;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+            transition: background-color 0.2s;
+            width: calc(100% - 48px);
+            margin-bottom: 10px;
+        }
+
+        .modal-link-btn:hover {
+            background-color: #ff4d6d;
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: #888888;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* =======================================
+           [하단 활동 링크 스타일]
+        ======================================= */
         .link-list {
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
         }
 
         .link-button {
             display: block;
-            padding: 16px;
+            padding: 14px;
             text-align: center;
             background-color: #fff0f3;
             color: #c9184a;
             text-decoration: none;
-            font-size: 16px;
             font-weight: bold;
             border-radius: 10px;
             transition: background-color 0.2s;
@@ -131,41 +254,122 @@
 </head>
 <body>
 
-    <!-- 1. 상단 메인 프로필 카드 -->
+    <!-- 1. 상단 프로필 영역 -->
     <div class="container">
         <img src="my-image.png" alt="프로필 사진" class="profile-img">
         <h1>다정현 핫클립</h1>
-        <p>이번주 핫클립이에용.</p>
-        
-        <button class="action-button" onclick="handleButtonClick()">클릭해보기</button>
-        <div id="result-text"></div>
+        <p style="margin: 0; color: #666;">도장을 클릭하여 핫클립 상세 정보를 확인해보세요.</p>
     </div>
 
-    <!-- 2. 하단 활동 및 링크 카드 -->
+    <!-- 2. 도장판 영역 (Stamp Board) -->
+    <div class="sub-container">
+        <div class="stamp-board-header">
+            <h2 class="sub-title" style="margin: 0; border: none;">출석 & 핫클립 도장판</h2>
+            <span class="stamp-count-badge" id="stamp-counter">도장 27개 달성</span>
+        </div>
+
+        <!-- 30개의 도장이 렌더링될 그리드 컨테이너 -->
+        <div class="stamp-grid" id="stamp-grid-container"></div>
+    </div>
+
+    <!-- 3. 하단 링크 영역 -->
     <div class="sub-container">
         <h2 class="sub-title">활동 및 링크</h2>
         <div class="link-list">
-            <a href="https://chzzk.naver.com/270b1c629013679b7341b0e764c0fc0a" target="_blank" class="link-button">치지직 채널 바로가기</a>
-            <a href="https://www.youtube.com/@dajunghyun" target="_blank" class="link-button">유튜브 채널 바로가기</a>
+            <a href="https://chzzk.naver.com" target="_blank" class="link-button">치지직 방송국 바로가기</a>
+            <a href="https://youtube.com" target="_blank" class="link-button">유튜브 채널 바로가기</a>
         </div>
     </div>
 
-    <!-- 3. 하단 공지사항 카드 -->
-    <div class="sub-container">
-        <h2 class="sub-title">공지사항</h2>
-        <p style="font-size: 16px; color: #666; margin: 0; line-height: 1.6;">
-            웹사이트를 지속적으로 업데이트하고 있습니다. 방문해 주셔서 감사합니다.
-        </p>
+    <!-- 4. 도장 클릭 시 노출되는 모달 팝업 -->
+    <div class="modal-overlay" id="info-modal" onclick="closeModal(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header" id="modal-title">[ 1번 도장 ]</div>
+            <div class="modal-date" id="modal-date">2026-08-01</div>
+            <div class="modal-info" id="modal-desc">간단한 정보가 표시됩니다.</div>
+            <a href="#" id="modal-link" target="_blank" class="modal-link-btn">영상 바로 보러가기</a>
+            <br>
+            <button class="modal-close-btn" onclick="closeModalDirect()">닫기</button>
+        </div>
     </div>
 
+    <!-- =======================================
+         [JavaScript 데이터 및 인터랙션 로직]
+    ======================================= -->
     <script>
-        let clickCount = 0;
+        // [도장별 상세 데이터 목록]
+        // 필요한 번호의 날짜, 정보, 링크 URL을 수정하여 사용하세요.
+        const stampData = {
+            1: { date: "2026-08-01", info: "첫 방송 시작! 체리창고의 개업식 하이라이트", url: "https://youtube.com" },
+            2: { date: "2026-08-02", info: "웃음 참기 챌린지 대실패 명장면", url: "https://youtube.com" },
+            3: { date: "2026-08-03", info: "★ 보상 핫클립: 노래방 애창곡 풀버전 공개", url: "https://youtube.com" },
+            4: { date: "2026-08-05", info: "공포게임 리액션 모음집", url: "https://youtube.com" },
+            5: { date: "2026-08-07", info: "시청자 참여 퀴즈쇼 1등 상품 전달식", url: "https://youtube.com" },
+            6: { date: "2026-08-09", info: "★ 보상 핫클립: 다정현의 첫 먹방 방송", url: "https://youtube.com" },
+            12: { date: "2026-08-15", info: "★ 스페셜 핫클립: 12번째 도장 달성 기념 영상", url: "https://youtube.com" },
+            27: { date: "2026-08-30", info: "★ 최근 핫클립: 27번째 출석 달성!", url: "https://youtube.com" }
+        };
 
-        function handleButtonClick() {
-            clickCount += 1;
-            const outputElement = document.getElementById("result-text");
-            outputElement.textContent = `버튼을 ${clickCount}번 클릭했습니다.`;
+        const totalStamps = 30;     // 전체 칸 수
+        const activeStamps = 27;    // 활성화(획득)된 도장 개수
+
+        // 그리드 렌더링 함수
+        function renderStampBoard() {
+            const gridContainer = document.getElementById("stamp-grid-container");
+            gridContainer.innerHTML = "";
+
+            for (let i = 1; i <= totalStamps; i++) {
+                const button = document.createElement("button");
+                button.className = "stamp-btn";
+                
+                // 3의 배수 번호는 특별 색상(노란색) 적용
+                if (i % 3 === 0) {
+                    button.classList.add("special");
+                }
+
+                // 획득한 도장과 미획득 도장 구분
+                if (i <= activeStamps) {
+                    button.innerHTML = `★<span class="stamp-number">${i}</span>`;
+                    button.onclick = () => openStampModal(i);
+                } else {
+                    button.classList.add("empty");
+                    button.innerHTML = `<span class="stamp-number">${i}</span>`;
+                }
+
+                gridContainer.appendChild(button);
+            }
         }
+
+        // 모달 열기
+        function openStampModal(stampNumber) {
+            const data = stampData[stampNumber] || {
+                date: "2026-08-00",
+                info: `${stampNumber}번째 도장 핫클립 준비 중입니다.`,
+                url: "https://youtube.com"
+            };
+
+            document.getElementById("modal-title").textContent = `[ ${stampNumber}번 도장 ]`;
+            document.getElementById("modal-date").textContent = `날짜: ${data.date}`;
+            document.getElementById("modal-desc").textContent = data.info;
+            document.getElementById("modal-link").href = data.url;
+
+            document.getElementById("info-modal").style.display = "flex";
+        }
+
+        // 모달 배경 클릭 시 닫기
+        function closeModal(event) {
+            if (event.target.id === "info-modal") {
+                document.getElementById("info-modal").style.display = "none";
+            }
+        }
+
+        // 닫기 버튼 직접 클릭 시
+        function closeModalDirect() {
+            document.getElementById("info-modal").style.display = "none";
+        }
+
+        // 페이지 로드 시 도장판 생성 실행
+        window.onload = renderStampBoard;
     </script>
 </body>
 </html>
