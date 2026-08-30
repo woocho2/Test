@@ -102,10 +102,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 18px;
-            color: #ced4da;
             padding: 0;
             transition: all 0.15s ease-in-out;
+            overflow: hidden; /* 이미지가 모서리 밖으로 나가지 않도록 방지 */
         }
 
         .stamp-btn:hover {
@@ -113,30 +112,34 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        /* =======================================
-           [도장 색상 변경 영역]
-        ======================================= */
+        /* [도장 칸 내부의 Jerry 이미지 스타일] */
+        .stamp-icon {
+            width: 70%;
+            height: 70%;
+            object-fit: contain; /* 비율 유지하며 칸 안에 쏙 들어가게 맞춤 */
+            pointer-events: none; /* 클릭 방해 방지 */
+        }
+
         /* [도장 획득 상태 (일반 - 분홍색)] */
         .stamp-btn.active {
-            background-color: #ffe5ec; /* 부드러운 연분홍 배경 */
-            border-color: #ff8fa3;     /* 분홍색 테두리 */
-            color: #c9184a;            /* 진한 핑크색 별(★) */
+            background-color: #ffe5ec;
+            border-color: #ff8fa3;
         }
 
         /* [도장 획득 상태 (3의 배수 보상 칸 - 초코색)] */
         .stamp-btn.active.special {
-            background-color: #ede0d4; /* 부드러운 밀크초코/베이지 배경 */
-            border-color: #b08968;     /* 초코 브라운 테두리 */
-            color: #7f4f24;            /* 딥 초콜릿 별(★) */
+            background-color: #ede0d4;
+            border-color: #b08968;
         }
 
         /* 도장 번호 라벨 */
         .stamp-number {
             position: absolute;
-            bottom: 4px;
-            right: 6px;
+            bottom: 3px;
+            right: 5px;
             font-size: 10px;
             color: #888888;
+            font-weight: 500;
         }
 
         /* [상세 정보 모달 팝업] */
@@ -288,10 +291,10 @@
                         btn.classList.add("special");
                     }
 
-                    // 활성화 번호 이하는 색칠(active) 및 별(★) 표시
+                    // 활성화 번호 이하는 Jerry 이미지 출력
                     if (s <= activeCount) {
                         btn.classList.add("active");
-                        btn.innerHTML = `★<span class="stamp-number">${s}</span>`;
+                        btn.innerHTML = `<img src="Jerry.png" alt="도장" class="stamp-icon"><span class="stamp-number">${s}</span>`;
                     } else {
                         btn.innerHTML = `<span class="stamp-number">${s}</span>`;
                     }
