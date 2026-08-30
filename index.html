@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>다정현네 체리창고</title>
+    <title>도장판 모음</title>
     
     <style>
-        /* [전체 배경 및 레이아웃] */
+        /* 전체 페이지 배경 및 레이아웃 */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: #fff0f3;
@@ -19,73 +19,52 @@
             gap: 24px;
         }
 
-        /* [공통 카드 컨테이너] */
-        .container, .sub-container {
+        /* 개별 도장판 카드 */
+        .board-card {
             background: #ffffff;
             max-width: 900px;
             width: 100%;
-            padding: 35px 40px;
+            padding: 30px;
             border-radius: 20px;
             border: 1px solid #ffccd5;
             box-shadow: 0 8px 20px rgba(255, 117, 143, 0.12);
             box-sizing: border-box;
         }
 
-        .container {
-            text-align: center;
-        }
-
-        /* [상단 프로필/배너 이미지] */
-        .profile-img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto 20px;
-            border-radius: 16px;
-            border: 4px solid #ff758f;
-        }
-
-        h1 {
-            font-size: 28px;
-            margin-bottom: 8px;
-            color: #c9184a;
-        }
-
-        .sub-title {
-            font-size: 20px;
-            color: #c9184a;
-            margin: 0 0 16px 0;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #fff0f3;
-        }
-
-        /* =======================================
-           [도장판 (Stamp Grid) 스타일]
-        ======================================= */
-        .stamp-board-header {
+        /* 도장판 상단 헤더 */
+        .board-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #fff0f3;
         }
 
-        .stamp-count-badge {
-            font-size: 14px;
-            color: #ff4d6d;
+        .board-title {
+            font-size: 20px;
             font-weight: bold;
+            color: #c9184a;
+            margin: 0;
+        }
+
+        .board-badge {
+            font-size: 13px;
+            font-weight: bold;
+            color: #ff4d6d;
             background-color: #fff0f3;
             padding: 6px 12px;
             border-radius: 20px;
         }
 
+        /* 30칸 그리드 (가로 10칸) */
         .stamp-grid {
             display: grid;
-            grid-template-columns: repeat(10, 1fr); /* 가로 10개 */
+            grid-template-columns: repeat(10, 1fr);
             gap: 8px;
-            margin-bottom: 12px;
         }
 
-        /* 반응형: 화면이 좁아지면 가로 개수 자동 조절 */
+        /* 모바일 대응 (가로 5칸) */
         @media (max-width: 768px) {
             .stamp-grid {
                 grid-template-columns: repeat(5, 1fr);
@@ -115,19 +94,11 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        /* 특별 보상 칸 (3의 배수) */
+        /* 3의 배수 특별 보상 칸 */
         .stamp-btn.special {
             background-color: #fff8e6;
             border: 2px solid #ffd166;
             color: #f77f00;
-        }
-
-        /* 아직 열리지 않은 빈 칸 */
-        .stamp-btn.empty {
-            background-color: #fafafa;
-            border: 2px solid #eeeeee;
-            color: #cccccc;
-            cursor: not-allowed;
         }
 
         /* 도장 우측 하단 번호 */
@@ -139,11 +110,9 @@
             color: #888888;
         }
 
-        /* =======================================
-           [팝업 모달 (Modal Popup) 스타일]
-        ======================================= */
+        /* 팝업 모달 배경 */
         .modal-overlay {
-            display: none; /* 기본 숨김 */
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
@@ -157,6 +126,7 @@
             box-sizing: border-box;
         }
 
+        /* 팝업 창 본체 */
         .modal-box {
             background: #ffffff;
             max-width: 420px;
@@ -166,13 +136,7 @@
             border: 1px solid #ffccd5;
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
             text-align: center;
-            position: relative;
-            animation: modalFadeIn 0.2s ease-out;
-        }
-
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+            box-sizing: border-box;
         }
 
         .modal-header {
@@ -208,9 +172,9 @@
             border-radius: 8px;
             font-weight: bold;
             font-size: 15px;
-            transition: background-color 0.2s;
             width: calc(100% - 48px);
             margin-bottom: 10px;
+            transition: background-color 0.2s;
         }
 
         .modal-link-btn:hover {
@@ -225,151 +189,95 @@
             cursor: pointer;
             text-decoration: underline;
         }
-
-        /* =======================================
-           [하단 활동 링크 스타일]
-        ======================================= */
-        .link-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .link-button {
-            display: block;
-            padding: 14px;
-            text-align: center;
-            background-color: #fff0f3;
-            color: #c9184a;
-            text-decoration: none;
-            font-weight: bold;
-            border-radius: 10px;
-            transition: background-color 0.2s;
-        }
-
-        .link-button:hover {
-            background-color: #ffccd5;
-        }
     </style>
 </head>
 <body>
 
-    <!-- 1. 상단 프로필 영역 -->
-    <div class="container">
-        <img src="my-image.png" alt="프로필 사진" class="profile-img">
-        <h1>다정현 핫클립</h1>
-        <p style="margin: 0; color: #666;">도장을 클릭하여 핫클립 상세 정보를 확인해보세요.</p>
-    </div>
+    <!-- 20개의 도장판이 생성될 영역 -->
+    <div id="boards-container" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 24px;"></div>
 
-    <!-- 2. 도장판 영역 (Stamp Board) -->
-    <div class="sub-container">
-        <div class="stamp-board-header">
-            <h2 class="sub-title" style="margin: 0; border: none;">출석 & 핫클립 도장판</h2>
-            <span class="stamp-count-badge" id="stamp-counter">도장 27개 달성</span>
-        </div>
-
-        <!-- 30개의 도장이 렌더링될 그리드 컨테이너 -->
-        <div class="stamp-grid" id="stamp-grid-container"></div>
-    </div>
-
-    <!-- 3. 하단 링크 영역 -->
-    <div class="sub-container">
-        <h2 class="sub-title">활동 및 링크</h2>
-        <div class="link-list">
-            <a href="https://chzzk.naver.com" target="_blank" class="link-button">치지직 방송국 바로가기</a>
-            <a href="https://youtube.com" target="_blank" class="link-button">유튜브 채널 바로가기</a>
-        </div>
-    </div>
-
-    <!-- 4. 도장 클릭 시 노출되는 모달 팝업 -->
+    <!-- 클릭 시 노출되는 모달 팝업 -->
     <div class="modal-overlay" id="info-modal" onclick="closeModal(event)">
         <div class="modal-box" onclick="event.stopPropagation()">
             <div class="modal-header" id="modal-title">[ 1번 도장 ]</div>
             <div class="modal-date" id="modal-date">2026-08-01</div>
             <div class="modal-info" id="modal-desc">간단한 정보가 표시됩니다.</div>
-            <a href="#" id="modal-link" target="_blank" class="modal-link-btn">영상 바로 보러가기</a>
+            <a href="#" id="modal-link" target="_blank" class="modal-link-btn">링크 바로가기</a>
             <br>
             <button class="modal-close-btn" onclick="closeModalDirect()">닫기</button>
         </div>
     </div>
 
-    <!-- =======================================
-         [JavaScript 데이터 및 인터랙션 로직]
-    ======================================= -->
     <script>
-        // [도장별 상세 데이터 목록]
-        // 필요한 번호의 날짜, 정보, 링크 URL을 수정하여 사용하세요.
-        const stampData = {
-            1: { date: "2026-08-01", info: "첫 방송 시작! 체리창고의 개업식 하이라이트", url: "https://youtube.com" },
-            2: { date: "2026-08-02", info: "웃음 참기 챌린지 대실패 명장면", url: "https://youtube.com" },
-            3: { date: "2026-08-03", info: "★ 보상 핫클립: 노래방 애창곡 풀버전 공개", url: "https://youtube.com" },
-            4: { date: "2026-08-05", info: "공포게임 리액션 모음집", url: "https://youtube.com" },
-            5: { date: "2026-08-07", info: "시청자 참여 퀴즈쇼 1등 상품 전달식", url: "https://youtube.com" },
-            6: { date: "2026-08-09", info: "★ 보상 핫클립: 다정현의 첫 먹방 방송", url: "https://youtube.com" },
-            12: { date: "2026-08-15", info: "★ 스페셜 핫클립: 12번째 도장 달성 기념 영상", url: "https://youtube.com" },
-            27: { date: "2026-08-30", info: "★ 최근 핫클립: 27번째 출석 달성!", url: "https://youtube.com" }
-        };
+        const totalBoards = 20;   // 생성할 도장판 개수
+        const stampsPerBoard = 30; // 판당 도장 개수
 
-        const totalStamps = 30;     // 전체 칸 수
-        const activeStamps = 27;    // 활성화(획득)된 도장 개수
+        // 20개의 도장판 자동 렌더링
+        function initBoards() {
+            const container = document.getElementById("boards-container");
+            container.innerHTML = "";
 
-        // 그리드 렌더링 함수
-        function renderStampBoard() {
-            const gridContainer = document.getElementById("stamp-grid-container");
-            gridContainer.innerHTML = "";
+            for (let b = 1; b <= totalBoards; b++) {
+                // 1. 도장판 카드 생성
+                const card = document.createElement("div");
+                card.className = "board-card";
 
-            for (let i = 1; i <= totalStamps; i++) {
-                const button = document.createElement("button");
-                button.className = "stamp-btn";
-                
-                // 3의 배수 번호는 특별 색상(노란색) 적용
-                if (i % 3 === 0) {
-                    button.classList.add("special");
+                // 2. 상단 헤더 (제목 및 배지)
+                const header = document.createElement("div");
+                header.className = "board-header";
+                header.innerHTML = `
+                    <h2 class="board-title">도장판 #${b}</h2>
+                    <span class="board-badge">총 30칸</span>
+                `;
+                card.appendChild(header);
+
+                // 3. 도장 그리드 생성
+                const grid = document.createElement("div");
+                grid.className = "stamp-grid";
+
+                for (let s = 1; s <= stampsPerBoard; s++) {
+                    const btn = document.createElement("button");
+                    btn.className = "stamp-btn";
+                    
+                    // 3의 배수 보상 칸 강조
+                    if (s % 3 === 0) {
+                        btn.classList.add("special");
+                    }
+
+                    btn.innerHTML = `★<span class="stamp-number">${s}</span>`;
+                    btn.onclick = () => openModal(b, s);
+
+                    grid.appendChild(btn);
                 }
 
-                // 획득한 도장과 미획득 도장 구분
-                if (i <= activeStamps) {
-                    button.innerHTML = `★<span class="stamp-number">${i}</span>`;
-                    button.onclick = () => openStampModal(i);
-                } else {
-                    button.classList.add("empty");
-                    button.innerHTML = `<span class="stamp-number">${i}</span>`;
-                }
-
-                gridContainer.appendChild(button);
+                card.appendChild(grid);
+                container.appendChild(card);
             }
         }
 
-        // 모달 열기
-        function openStampModal(stampNumber) {
-            const data = stampData[stampNumber] || {
-                date: "2026-08-00",
-                info: `${stampNumber}번째 도장 핫클립 준비 중입니다.`,
-                url: "https://youtube.com"
-            };
-
-            document.getElementById("modal-title").textContent = `[ ${stampNumber}번 도장 ]`;
-            document.getElementById("modal-date").textContent = `날짜: ${data.date}`;
-            document.getElementById("modal-desc").textContent = data.info;
-            document.getElementById("modal-link").href = data.url;
+        // 모달 열기 함수
+        function openModal(boardIndex, stampIndex) {
+            document.getElementById("modal-title").textContent = `[ 도장판 #${boardIndex} - ${stampIndex}번 도장 ]`;
+            document.getElementById("modal-date").textContent = `날짜: 2026-08-${stampIndex < 10 ? '0' + stampIndex : stampIndex}`;
+            document.getElementById("modal-desc").textContent = `${boardIndex}번째 판의 ${stampIndex}번 도장 상세 안내 정보입니다.`;
+            document.getElementById("modal-link").href = "https://youtube.com";
 
             document.getElementById("info-modal").style.display = "flex";
         }
 
-        // 모달 배경 클릭 시 닫기
+        // 모달 닫기 함수
         function closeModal(event) {
             if (event.target.id === "info-modal") {
                 document.getElementById("info-modal").style.display = "none";
             }
         }
 
-        // 닫기 버튼 직접 클릭 시
         function closeModalDirect() {
             document.getElementById("info-modal").style.display = "none";
         }
 
-        // 페이지 로드 시 도장판 생성 실행
-        window.onload = renderStampBoard;
+        // 페이지 로드 시 도장판 20개 생성 실행
+        window.addEventListener("DOMContentLoaded", initBoards);
     </script>
 </body>
 </html>
