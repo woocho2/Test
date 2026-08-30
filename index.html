@@ -132,14 +132,27 @@
             border-color: #b08968;
         }
 
-        /* 도장 번호 라벨 */
+        /* =======================================
+           [도장 번호 숫자 라벨 스타일]
+        ======================================= */
+        /* 기본 미달성 칸 숫자 색상 */
         .stamp-number {
             position: absolute;
             bottom: 3px;
             right: 5px;
             font-size: 10px;
             color: #888888;
-            font-weight: 500;
+            font-weight: 600;
+        }
+
+        /* 분홍색 도장 칸의 숫자: 진한 핑크색 */
+        .stamp-btn.active .stamp-number {
+            color: #c9184a;
+        }
+
+        /* 초코색 도장 칸의 숫자: 진한 초콜릿 브라운 */
+        .stamp-btn.active.special .stamp-number {
+            color: #6f4518;
         }
 
         /* [상세 정보 모달 팝업] */
@@ -162,7 +175,7 @@
             background: #ffffff;
             max-width: 360px;
             width: 100%;
-            border-radius: 16px;
+            border-radius: 18px;
             padding: 24px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             box-sizing: border-box;
@@ -294,29 +307,21 @@
         const totalBoards = 20;     // 생성할 총 도장판 개수
         const stampsPerBoard = 30;   // 각 판당 칸 수
 
-        // ========================================================
-        // [1. 도장판 이름(닉네임/타이틀) 관리]
-        // ========================================================
+        // [도장판 이름(닉네임/타이틀) 관리]
         const boardNames = {
-            1: "다정현",
-            2: "뮤리벨렌",
-            3: "조선우"
-            // 지정하지 않은 번호는 기본값(도장판 #번호)으로 자동 표시됩니다.
+            1: "르나이라",
+            2: "라면먹은찹쌀이",
+            3: "메론딸기푸딩"
         };
 
-        // ========================================================
-        // [2. 도장판별 활성화(색칠) 개수 설정]
-        // ========================================================
+        // [도장판별 활성화 개수 설정]
         const boardActiveCounts = {
             1: 3,
             2: 1,
             3: 0
         };
 
-        // ========================================================
-        // [3. 도장별 세부 데이터 관리]
-        // "도장판번호-도장번호": { date: "날짜", text: "문구", url: "링크" }
-        // ========================================================
+        // [도장별 세부 데이터 관리]
         const stampData = {
             // [1번 도장판]
             "1-1": {
@@ -353,7 +358,6 @@
                 card.className = "board-card";
 
                 const activeCount = boardActiveCounts[b] || 0;
-                // boardNames에 등록된 이름이 있으면 사용, 없으면 '도장판 #번호' 사용
                 const currentBoardTitle = boardNames[b] || `도장판 #${b}`;
 
                 // 상단 타이틀 및 달성 배지
@@ -373,12 +377,10 @@
                     const btn = document.createElement("button");
                     btn.className = "stamp-btn";
 
-                    // 3의 배수는 special 클래스 부여
                     if (s % 3 === 0) {
                         btn.classList.add("special");
                     }
 
-                    // 활성화 번호 이하는 Jerry 이미지 출력
                     if (s <= activeCount) {
                         btn.classList.add("active");
                         btn.innerHTML = `<img src="Jerry.png" alt="도장" class="stamp-icon"><span class="stamp-number">${s}</span>`;
