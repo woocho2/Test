@@ -6,26 +6,23 @@
     <title>다정현 핫클립 저장소</title>
     
     <style>
-        /* [전체 페이지 배경 및 정렬] */
+        /* [전체 페이지 배경 및 정렬 - 덜컥거림 원천 차단] */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: #fff0f3;
             color: #4a4a4a;
             margin: 0;
-            padding: 50px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 24px;
+            padding: 50px 20px 100px;
             box-sizing: border-box;
-            overflow-y: scroll; /* 스크롤바 유무로 인한 가로폭 덜컥거림 방지 */
+            overflow-y: scroll; /* 스크롤바 생성/제거로 인한 가로 떨림 방지 */
         }
 
-        /* [공통 카드 컨테이너 스타일] */
+        /* [공통 카드 컨테이너 스타일 - margin: 0 auto 24px로 중앙 정렬] */
         .container, .board-card, .goods-card {
             background: #ffffff;
             max-width: 1100px;
             width: 100%;
+            margin: 0 auto 24px;
             padding: 35px 40px;
             border-radius: 20px;
             border: 1px solid #ffccd5;
@@ -180,16 +177,22 @@
         }
 
         /* =======================================
-           [검색 및 정렬 바 스타일]
+           [검색 및 정렬 바 - 상단 Sticky 고정]
         ======================================= */
         .search-sort-bar {
             max-width: 1100px;
             width: 100%;
+            margin: 0 auto 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 16px;
             box-sizing: border-box;
+            position: sticky;
+            top: 15px; /* 스크롤 내려도 상단에 안정적으로 안착 */
+            z-index: 100;
+            background-color: #fff0f3; /* 배경 비침 방지 */
+            padding: 6px 0;
         }
 
         .search-box-wrapper {
@@ -216,14 +219,14 @@
             font-size: 14px;
             color: #4a4a4a;
             outline: none;
-            box-shadow: 0 4px 10px rgba(255, 117, 143, 0.06);
+            box-shadow: 0 4px 10px rgba(255, 117, 143, 0.08);
             box-sizing: border-box;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .search-input:focus {
             border-color: #ff758f;
-            box-shadow: 0 4px 12px rgba(255, 117, 143, 0.18);
+            box-shadow: 0 4px 12px rgba(255, 117, 143, 0.2);
         }
 
         .sort-btn-group {
@@ -233,7 +236,7 @@
             padding: 4px;
             border-radius: 12px;
             border: 1.5px solid #ffccd5;
-            box-shadow: 0 4px 10px rgba(255, 117, 143, 0.06);
+            box-shadow: 0 4px 10px rgba(255, 117, 143, 0.08);
             flex-shrink: 0;
         }
 
@@ -259,19 +262,16 @@
             color: #ffffff;
         }
 
-        /* 도장판 컨테이너: 높이 급변 방지용 min-height 적용 */
+        /* 도장판 컨테이너 영역 */
         #boards-container {
+            max-width: 1100px;
             width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 24px;
-            min-height: 80vh; /* 검색 결과가 적어져도 화면 덜컥거림을 방지 */
+            margin: 0 auto;
+            min-height: 70vh; /* 검색 결과가 0~1개여도 높이를 유지해 흔들림 방지 */
         }
 
         .no-result-msg {
             background: #ffffff;
-            max-width: 1100px;
             width: 100%;
             padding: 40px 20px;
             border-radius: 20px;
@@ -500,13 +500,13 @@
         ======================================= */
         @media (max-width: 768px) {
             body {
-                padding: 24px 12px;
-                gap: 16px;
+                padding: 24px 12px 60px;
             }
 
             .container, .board-card, .goods-card {
                 padding: 22px 16px;
                 border-radius: 16px;
+                margin-bottom: 16px;
             }
 
             h1 {
@@ -516,6 +516,8 @@
             .search-sort-bar {
                 flex-direction: column;
                 gap: 10px;
+                top: 10px;
+                margin-bottom: 16px;
             }
 
             .sort-btn-group {
@@ -575,7 +577,7 @@
         <p class="goods-footer-msg">항상 클립 따주셔서 정말 감사합니다 💖 작게나마 보답이 되었으면 좋겠습니다!</p>
     </div>
 
-    <!-- 3. 닉네임 검색 및 정렬 바 -->
+    <!-- 3. 닉네임 검색 및 정렬 바 (상단 고정) -->
     <div class="search-sort-bar">
         <div class="search-box-wrapper">
             <span class="search-icon">🔍</span>
@@ -590,7 +592,6 @@
 
     <!-- 4. 도장판 목록 영역 -->
     <div id="boards-container">
-        <!-- 검색 결과 없음 안내 메시지 (초기 숨김) -->
         <div class="no-result-msg" id="no-result-msg"></div>
     </div>
 
@@ -692,14 +693,10 @@
             "2-3": { date: "2026. 8. 31.", text: "26.08 [T1] 버른살의 애교", url: "https://chzzk.naver.com/clips/iam0ruNKlk" }
         };
 
-        // ========================================================
-        // [개선된 도장판 초기화 및 필터링/정렬 로직]
-        // ========================================================
-        const boardElementsMap = {}; // DOM 요소를 보관하여 재사용
+        const boardElementsMap = {};
         let currentSortMode = 'default';
         let searchQuery = '';
 
-        // 1회 초기 렌더링 (20개 도장판을 미리 생성)
         function createAllBoards() {
             const container = document.getElementById("boards-container");
 
@@ -742,7 +739,6 @@
                 card.appendChild(grid);
                 container.appendChild(card);
 
-                // 검색/정렬을 위한 캐싱
                 boardElementsMap[b] = {
                     element: card,
                     id: b,
@@ -764,14 +760,12 @@
             updateBoardDisplay();
         }
 
-        // 검색 시 DOM을 지우지 않고 가시성 및 순서만 조정
         function updateBoardDisplay() {
             const container = document.getElementById("boards-container");
             const noResultElem = document.getElementById("no-result-msg");
             
             let list = Object.values(boardElementsMap);
 
-            // 정렬 처리
             if (currentSortMode === 'name') {
                 list.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
             } else if (currentSortMode === 'stamps') {
@@ -786,7 +780,7 @@
                 const isMatch = !searchQuery || item.name.toLowerCase().includes(searchQuery);
                 if (isMatch) {
                     item.element.style.display = 'block';
-                    container.appendChild(item.element); // 정렬된 순서대로 재배치
+                    container.appendChild(item.element);
                     visibleCount++;
                 } else {
                     item.element.style.display = 'none';
