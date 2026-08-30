@@ -18,6 +18,7 @@
             align-items: center;
             gap: 24px;
             box-sizing: border-box;
+            overflow-y: scroll; /* 스크롤바 유무로 인한 가로폭 덜컥거림 방지 */
         }
 
         /* [공통 카드 컨테이너 스타일] */
@@ -258,7 +259,16 @@
             color: #ffffff;
         }
 
-        /* 검색 결과 없음 문구 */
+        /* 도장판 컨테이너: 높이 급변 방지용 min-height 적용 */
+        #boards-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            min-height: 80vh; /* 검색 결과가 적어져도 화면 덜컥거림을 방지 */
+        }
+
         .no-result-msg {
             background: #ffffff;
             max-width: 1100px;
@@ -270,6 +280,7 @@
             color: #888888;
             font-size: 15px;
             box-sizing: border-box;
+            display: none;
         }
 
         /* =======================================
@@ -306,7 +317,6 @@
             gap: 8px;
         }
 
-        /* [일반 미달성 빈 칸: 은은한 연분홍] */
         .stamp-btn {
             position: relative;
             aspect-ratio: 1 / 1;
@@ -328,7 +338,6 @@
             border-color: #ffccd5;
         }
 
-        /* [3의 배수 미달성 빈 칸: 은은한 연초코] */
         .stamp-btn.special {
             background-color: #faf7f5;
             border: 1.5px solid #ede0d4;
@@ -346,19 +355,16 @@
             pointer-events: none;
         }
 
-        /* [도장 획득 상태 (일반 - 분홍색)] */
         .stamp-btn.active {
             background-color: #ffe5ec;
             border: 2px solid #ff8fa3;
         }
 
-        /* [도장 획득 상태 (3의 배수 보상 칸 - 초코색)] */
         .stamp-btn.active.special {
             background-color: #ede0d4;
             border: 2px solid #b08968;
         }
 
-        /* [숫자 라벨 스타일] */
         .stamp-number {
             position: absolute;
             bottom: 3px;
@@ -507,7 +513,6 @@
                 font-size: 22px;
             }
 
-            /* 검색바 세로 또는 콤팩트 가로 배치 */
             .search-sort-bar {
                 flex-direction: column;
                 gap: 10px;
@@ -545,12 +550,14 @@
 </head>
 <body>
 
+    <!-- 1. 상단 프로필/배너 메인 보드 -->
     <div class="container">
         <img src="my-image.png" alt="프로필 사진" class="profile-img">
         <h1>다정현 핫클립 저장소</h1>
         <p style="margin: 0; color: #666; font-size: 15px;">원하는 도장을 클릭하여 상세 클립 정보를 확인하세요.</p>
     </div>
 
+    <!-- 2. 핫클립 굿즈 안내 박스 -->
     <div class="goods-card">
         <div class="goods-header">
             <h2 class="goods-title">🎁 핫클립 굿즈 안내</h2>
@@ -568,6 +575,7 @@
         <p class="goods-footer-msg">항상 클립 따주셔서 정말 감사합니다 💖 작게나마 보답이 되었으면 좋겠습니다!</p>
     </div>
 
+    <!-- 3. 닉네임 검색 및 정렬 바 -->
     <div class="search-sort-bar">
         <div class="search-box-wrapper">
             <span class="search-icon">🔍</span>
@@ -580,8 +588,13 @@
         </div>
     </div>
 
-    <div id="boards-container" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 24px;"></div>
+    <!-- 4. 도장판 목록 영역 -->
+    <div id="boards-container">
+        <!-- 검색 결과 없음 안내 메시지 (초기 숨김) -->
+        <div class="no-result-msg" id="no-result-msg"></div>
+    </div>
 
+    <!-- 5. 상세 정보 모달 창 -->
     <div class="modal-overlay" id="info-modal" onclick="closeModal(event)">
         <div class="modal-box" onclick="event.stopPropagation()">
             <div class="modal-header-row">
@@ -609,6 +622,7 @@
         </div>
     </div>
 
+    <!-- [스크립트 로직] -->
     <script>
         const goodsList = [
             { id: 1, name: "다정현 손편지", desc: "보상사용 할까말까 고민되는군요", img: "gift1.png", isSpecial: false },
@@ -679,70 +693,29 @@
         };
 
         // ========================================================
-        // [검색 및 정렬 로직]
+        // [개선된 도장판 초기화 및 필터링/정렬 로직]
         // ========================================================
+        const boardElementsMap = {}; // DOM 요소를 보관하여 재사용
         let currentSortMode = 'default';
         let searchQuery = '';
 
-        function setSortMode(mode) {
-            currentSortMode = mode;
-            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`sort-${mode}`).classList.add('active');
-            renderFilteredBoards();
-        }
-
-        function handleSearch() {
-            searchQuery = document.getElementById('nickname-search').value.trim().toLowerCase();
-            renderFilteredBoards();
-        }
-
-        function renderFilteredBoards() {
+        // 1회 초기 렌더링 (20개 도장판을 미리 생성)
+        function createAllBoards() {
             const container = document.getElementById("boards-container");
-            container.innerHTML = "";
 
-            // 도장판 데이터 리스트 구성
-            let list = [];
             for (let b = 1; b <= totalBoards; b++) {
-                list.push({
-                    id: b,
-                    name: boardNames[b] || `도장판 #${b}`,
-                    count: boardActiveCounts[b] || 0
-                });
-            }
+                const name = boardNames[b] || `도장판 #${b}`;
+                const count = boardActiveCounts[b] || 0;
 
-            // 검색어 필터링
-            if (searchQuery) {
-                list = list.filter(item => item.name.toLowerCase().includes(searchQuery));
-            }
-
-            // 정렬 처리
-            if (currentSortMode === 'name') {
-                list.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
-            } else if (currentSortMode === 'stamps') {
-                list.sort((a, b) => b.count - a.count || a.id - b.id);
-            } else {
-                list.sort((a, b) => a.id - b.id);
-            }
-
-            // 검색 결과 없을 때 안내
-            if (list.length === 0) {
-                const noResult = document.createElement("div");
-                noResult.className = "no-result-msg";
-                noResult.textContent = `'${searchQuery}' 검색 결과와 일치하는 도장판이 없습니다.`;
-                container.appendChild(noResult);
-                return;
-            }
-
-            // 필터/정렬된 리스트 렌더링
-            list.forEach(item => {
                 const card = document.createElement("div");
                 card.className = "board-card";
+                card.id = `board-card-${b}`;
 
                 const header = document.createElement("div");
                 header.className = "board-header";
                 header.innerHTML = `
-                    <h2 class="board-title">${item.name}</h2>
-                    <span class="board-badge">도장 ${item.count} / ${stampsPerBoard}개</span>
+                    <h2 class="board-title">${name}</h2>
+                    <span class="board-badge">도장 ${count} / ${stampsPerBoard}개</span>
                 `;
                 card.appendChild(header);
 
@@ -753,24 +726,79 @@
                     const btn = document.createElement("button");
                     btn.className = "stamp-btn";
 
-                    if (s % 3 === 0) {
-                        btn.classList.add("special");
-                    }
+                    if (s % 3 === 0) btn.classList.add("special");
 
-                    if (s <= item.count) {
+                    if (s <= count) {
                         btn.classList.add("active");
                         btn.innerHTML = `<img src="Jerry.png" alt="도장" class="stamp-icon"><span class="stamp-number">${s}</span>`;
                     } else {
                         btn.innerHTML = `<span class="stamp-number">${s}</span>`;
                     }
 
-                    btn.onclick = () => openModal(item.id, s, item.count);
+                    btn.onclick = () => openModal(b, s, count);
                     grid.appendChild(btn);
                 }
 
                 card.appendChild(grid);
                 container.appendChild(card);
+
+                // 검색/정렬을 위한 캐싱
+                boardElementsMap[b] = {
+                    element: card,
+                    id: b,
+                    name: name,
+                    count: count
+                };
+            }
+        }
+
+        function setSortMode(mode) {
+            currentSortMode = mode;
+            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`sort-${mode}`).classList.add('active');
+            updateBoardDisplay();
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('nickname-search').value.trim().toLowerCase();
+            updateBoardDisplay();
+        }
+
+        // 검색 시 DOM을 지우지 않고 가시성 및 순서만 조정
+        function updateBoardDisplay() {
+            const container = document.getElementById("boards-container");
+            const noResultElem = document.getElementById("no-result-msg");
+            
+            let list = Object.values(boardElementsMap);
+
+            // 정렬 처리
+            if (currentSortMode === 'name') {
+                list.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+            } else if (currentSortMode === 'stamps') {
+                list.sort((a, b) => b.count - a.count || a.id - b.id);
+            } else {
+                list.sort((a, b) => a.id - b.id);
+            }
+
+            let visibleCount = 0;
+
+            list.forEach(item => {
+                const isMatch = !searchQuery || item.name.toLowerCase().includes(searchQuery);
+                if (isMatch) {
+                    item.element.style.display = 'block';
+                    container.appendChild(item.element); // 정렬된 순서대로 재배치
+                    visibleCount++;
+                } else {
+                    item.element.style.display = 'none';
+                }
             });
+
+            if (visibleCount === 0) {
+                noResultElem.textContent = `'${searchQuery}' 검색 결과와 일치하는 도장판이 없습니다.`;
+                noResultElem.style.display = 'block';
+            } else {
+                noResultElem.style.display = 'none';
+            }
         }
 
         function openModal(boardIndex, stampIndex, activeCount) {
@@ -817,7 +845,8 @@
 
         window.addEventListener("DOMContentLoaded", () => {
             renderGoods();
-            renderFilteredBoards();
+            createAllBoards();
+            updateBoardDisplay();
         });
     </script>
 </body>
