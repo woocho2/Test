@@ -1,871 +1,921 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>다정현 핫클립 저장소</title>
-    
-    <style>
-        /* [전체 페이지 배경 및 정렬 - 덜컥거림 원천 차단] */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #fff0f3;
-            color: #4a4a4a;
-            margin: 0;
-            padding: 50px 20px 100px;
-            box-sizing: border-box;
-            overflow-y: scroll;
-        }
-
-        /* [공통 카드 컨테이너 스타일] */
-        .container, .board-card, .goods-card {
-            background: #ffffff;
-            max-width: 1100px;
-            width: 100%;
-            margin: 0 auto 24px;
-            padding: 35px 40px;
-            border-radius: 20px;
-            border: 1px solid #ffccd5;
-            box-shadow: 0 8px 20px rgba(255, 117, 143, 0.12);
-            box-sizing: border-box;
-        }
-
-        .container {
-            text-align: center;
-        }
-
-        /* [상단 배너 이미지] */
-        .profile-img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto 20px;
-            border-radius: 16px;
-            border: 4px solid #ff758f;
-        }
-
-        h1 {
-            font-size: 28px;
-            margin-bottom: 8px;
-            color: #c9184a;
-        }
-
-        /* =======================================
-           [굿즈 안내 박스 스타일]
-        ======================================= */
-        .goods-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-
-        .goods-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #c9184a;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .goods-badge-pink {
-            font-size: 12px;
-            font-weight: bold;
-            color: #c9184a;
-            background-color: #fff0f3;
-            border: 1px solid #ffccd5;
-            padding: 4px 10px;
-            border-radius: 20px;
-        }
-
-        .goods-description {
-            font-size: 14px;
-            color: #4b5563;
-            line-height: 1.7;
-            margin: 0 0 20px 0;
-        }
-
-        .goods-description b {
-            color: #c9184a;
-        }
-
-        .goods-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .goods-item {
-            background: #ffffff;
-            border: 1px solid #ffe5ec;
-            border-radius: 12px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            text-align: left;
-            transition: transform 0.15s ease-in-out, box-shadow 0.15s;
-        }
-
-        .goods-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 14px rgba(255, 117, 143, 0.15);
-            border-color: #ffccd5;
-        }
-
-        .goods-img-wrapper {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            background-color: #fffafb;
-            border: 1px solid #fff0f3;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .goods-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .goods-badge-no {
-            align-self: flex-start;
-            font-size: 11px;
-            font-weight: bold;
-            color: #c9184a;
-            background-color: #ffe5ec;
-            padding: 2px 8px;
-            border-radius: 12px;
-            margin-bottom: 6px;
-        }
-
-        .goods-badge-no.special {
-            color: #6f4518;
-            background-color: #ede0d4;
-            border: 1px solid #b08968;
-        }
-
-        .goods-name {
-            font-size: 14px;
-            font-weight: bold;
-            color: #111827;
-            margin: 0 0 4px 0;
-            line-height: 1.3;
-        }
-
-        .goods-info {
-            font-size: 11px;
-            color: #6b7280;
-            line-height: 1.4;
-            margin: 0;
-            word-break: keep-all;
-        }
-
-        .goods-footer-msg {
-            text-align: center;
-            font-size: 13px;
-            color: #888888;
-            padding-top: 16px;
-            border-top: 1px dashed #ffccd5;
-            margin: 0;
-        }
-
-        /* =======================================
-           [검색 및 정렬 바 - 상단 Sticky 고정]
-        ======================================= */
-        .search-sort-bar {
-            max-width: 1100px;
-            width: 100%;
-            margin: 0 auto 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            box-sizing: border-box;
-            position: sticky;
-            top: 15px;
-            z-index: 100;
-            background-color: #fff0f3;
-            padding: 6px 0;
-        }
-
-        .search-box-wrapper {
-            flex: 1;
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 16px;
-            font-size: 16px;
-            color: #ff758f;
-            pointer-events: none;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 12px 16px 12px 42px;
-            border-radius: 12px;
-            border: 1.5px solid #ffccd5;
-            background-color: #ffffff;
-            font-size: 14px;
-            color: #4a4a4a;
-            outline: none;
-            box-shadow: 0 4px 10px rgba(255, 117, 143, 0.08);
-            box-sizing: border-box;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .search-input:focus {
-            border-color: #ff758f;
-            box-shadow: 0 4px 12px rgba(255, 117, 143, 0.2);
-        }
-
-        .sort-btn-group {
-            display: flex;
-            gap: 6px;
-            background: #ffffff;
-            padding: 4px;
-            border-radius: 12px;
-            border: 1.5px solid #ffccd5;
-            box-shadow: 0 4px 10px rgba(255, 117, 143, 0.08);
-            flex-shrink: 0;
-        }
-
-        .sort-btn {
-            border: none;
-            background: none;
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: bold;
-            color: #888888;
-            cursor: pointer;
-            transition: all 0.15s ease-in-out;
-        }
-
-        .sort-btn:hover {
-            color: #c9184a;
-            background-color: #fff0f3;
-        }
-
-        .sort-btn.active {
-            background-color: #ff758f;
-            color: #ffffff;
-        }
-
-        #boards-container {
-            max-width: 1100px;
-            width: 100%;
-            margin: 0 auto;
-            min-height: 70vh;
-        }
-
-        .no-result-msg {
-            background: #ffffff;
-            width: 100%;
-            padding: 40px 20px;
-            border-radius: 20px;
-            border: 1px dashed #ffccd5;
-            text-align: center;
-            color: #888888;
-            font-size: 15px;
-            box-sizing: border-box;
-            display: none;
-        }
-
-        /* =======================================
-           [도장판 영역 스타일]
-        ======================================= */
-        .board-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #fff0f3;
-        }
-
-        .board-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #c9184a;
-            margin: 0;
-        }
-
-        .board-badge {
-            font-size: 13px;
-            font-weight: bold;
-            color: #ff4d6d;
-            background-color: #fff0f3;
-            padding: 6px 12px;
-            border-radius: 20px;
-        }
-
-        .stamp-grid {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 8px;
-        }
-
-        .stamp-btn {
-            position: relative;
-            aspect-ratio: 1 / 1;
-            background-color: #fffbfc;
-            border: 1.5px solid #ffe3ea;
-            border-radius: 10px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0;
-            transition: all 0.15s ease-in-out;
-            overflow: hidden;
-        }
-
-        .stamp-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(255, 117, 143, 0.15);
-            border-color: #ffccd5;
-        }
-
-        .stamp-btn.special {
-            background-color: #faf7f5;
-            border: 1.5px solid #ede0d4;
-        }
-
-        .stamp-btn.special:hover {
-            border-color: #d6c1af;
-            box-shadow: 0 4px 8px rgba(111, 69, 24, 0.1);
-        }
-
-        .stamp-icon {
-            width: 70%;
-            height: 70%;
-            object-fit: contain;
-            pointer-events: none;
-        }
-
-        .stamp-btn.active {
-            background-color: #ffe5ec;
-            border: 2px solid #ff8fa3;
-        }
-
-        .stamp-btn.active.special {
-            background-color: #ede0d4;
-            border: 2px solid #b08968;
-        }
-
-        .stamp-number {
-            position: absolute;
-            bottom: 3px;
-            right: 5px;
-            font-size: 10px;
-            color: #c9a9b0;
-            font-weight: 600;
-        }
-
-        .stamp-btn.special .stamp-number {
-            color: #bfaea2;
-        }
-
-        .stamp-btn.active .stamp-number {
-            color: #c9184a;
-        }
-
-        .stamp-btn.active.special .stamp-number {
-            color: #6f4518;
-        }
-
-        /* =======================================
-           [상세 정보 모달 팝업]
-        ======================================= */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .modal-box {
-            background: #ffffff;
-            max-width: 380px;
-            width: 100%;
-            border-radius: 18px;
-            padding: 24px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            box-sizing: border-box;
-            position: relative;
-            text-align: left;
-        }
-
-        .modal-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-title-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .title-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            transition: background-color 0.2s;
-        }
-
-        .modal-title-text {
-            font-size: 18px;
-            font-weight: bold;
-            color: #1f2937;
-        }
-
-        .modal-close-icon {
-            width: 28px;
-            height: 28px;
-            background: #f3f4f6;
-            border: 1px solid #e5e7eb;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            color: #6b7280;
-            font-size: 14px;
-            line-height: 1;
-            padding: 0;
-            transition: background 0.15s;
-        }
-
-        .modal-close-icon:hover {
-            background: #e5e7eb;
-            color: #111827;
-        }
-
-        .modal-item-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            font-size: 15px;
-            color: #374151;
-        }
-
-        .modal-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            word-break: break-all;
-        }
-
-        .modal-item-icon {
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-
-        .modal-item-link {
-            color: #c9184a;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .modal-item-link:hover {
-            text-decoration: underline;
-        }
-
-        /* =======================================
-           [스마트폰/모바일 최적화]
-        ======================================= */
-        @media (max-width: 768px) {
-            body {
-                padding: 24px 12px 60px;
-            }
-
-            .container, .board-card, .goods-card {
-                padding: 22px 16px;
-                border-radius: 16px;
-                margin-bottom: 16px;
-            }
-
-            h1 {
-                font-size: 22px;
-            }
-
-            .search-sort-bar {
-                flex-direction: column;
-                gap: 10px;
-                top: 10px;
-                margin-bottom: 16px;
-            }
-
-            .sort-btn-group {
-                width: 100%;
-                justify-content: space-between;
-                box-sizing: border-box;
-            }
-
-            .sort-btn {
-                flex: 1;
-                padding: 8px 6px;
-                text-align: center;
-            }
-
-            .goods-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-
-            .stamp-grid {
-                grid-template-columns: repeat(6, 1fr);
-                gap: 6px;
-            }
-
-            .stamp-number {
-                font-size: 8px;
-                bottom: 2px;
-                right: 3px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>파스텔 방송 스케줄러</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: #f7f9fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #333333;
+      padding: 30px 20px;
+    }
+
+    /* 메인 컨테이너 */
+    .calendar-container {
+      background-color: #ffffff;
+      padding: 32px 36px;
+      border-radius: 20px;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    /* 상단 네비게이션 & 로그인 바 */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .calendar-controller {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      background: none;
+      border: 1px solid #e1e4e8;
+      border-radius: 8px;
+      width: 38px;
+      height: 38px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 16px;
+      color: #555555;
+      transition: background-color 0.2s;
+    }
+
+    .nav-btn:hover {
+      background-color: #f0f4f8;
+    }
+
+    .select-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    select {
+      padding: 8px 12px;
+      border: 1px solid #e1e4e8;
+      border-radius: 8px;
+      background-color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333333;
+      outline: none;
+      cursor: pointer;
+    }
+
+    select:focus {
+      border-color: #5B92E5;
+    }
+
+    /* 로그인/로그아웃 버튼 */
+    .auth-btn {
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid #e1e4e8;
+      background-color: #ffffff;
+      color: #555555;
+      transition: all 0.2s;
+    }
+
+    .auth-btn.logged-in {
+      background-color: #2D3748;
+      color: #ffffff;
+      border-color: #2D3748;
+    }
+
+    .auth-btn:hover {
+      opacity: 0.9;
+    }
+
+    /* 요일 헤더 */
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      text-align: center;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .sun { color: #EA7B7B; }
+    .sat { color: #5B92E5; }
+
+    /* 날짜 그리드 */
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      grid-template-rows: repeat(6, 110px);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    /* 날짜 셀 */
+    .day {
+      height: 110px;
+      width: 100%;
+      background-color: #ffffff;
+      border: 1px solid #eef0f3;
+      border-radius: 12px;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .day:hover:not(.empty) {
+      border-color: #5B92E5;
+    }
+
+    .day.empty {
+      background-color: #ffffff;
+      border: none;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .day-number {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      flex-shrink: 0;
+    }
+
+    .day.selected {
+      outline: 2px solid #2D3748;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+      z-index: 1;
+    }
+
+    /* 상태별 배경색 */
+    .day.status-on {
+      background-color: #FFEAEA;
+      border-color: #FFD5D5;
+    }
+
+    .day.status-off {
+      background-color: #EDEDED;
+      border-color: #DBDBDB;
+    }
+
+    .day.status-none {
+      background-color: #FFFFFF;
+    }
+
+    /* 일정 콘텐츠 영역 */
+    .schedule-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 3px;
+      font-size: 11px;
+      line-height: 1.25;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .schedule-item-line {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      align-items: baseline;
+      gap: 4px;
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .schedule-time-tag {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #2D3748;
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    .schedule-text-tag {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+      color: #222222;
+    }
+
+    .off-label {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #666666;
+    }
+
+    /* 하단 편집 영역 (비로그인 시 숨김) */
+    .edit-section {
+      border-top: 1px solid #f0f0f0;
+      padding-top: 20px;
+      display: none; /* 기본 숨김 */
+    }
+
+    .edit-section.active {
+      display: block; /* 관리자 로그인 시 활성화 */
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #2D3748;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .status-options {
+      display: flex;
+      gap: 14px;
+    }
+
+    .status-option {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13.5px;
+      cursor: pointer;
+    }
+
+    .memo-list-editor {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .memo-editor-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background-color: #fafbfc;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #edf0f2;
+    }
+
+    .memo-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #4A5568;
+      width: 45px;
+      flex-shrink: 0;
+    }
+
+    .time-picker-set {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .time-picker-set label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #555555;
+    }
+
+    .time-picker-set select {
+      padding: 4px 8px;
+      font-size: 12.5px;
+      font-weight: normal;
+      border-radius: 6px;
+    }
+
+    .direct-time-input {
+      width: 75px;
+      padding: 4px 8px;
+      border: 1px solid #e1e4e8;
+      border-radius: 6px;
+      font-size: 12.5px;
+      outline: none;
+    }
+
+    .memo-text-input {
+      flex: 1;
+      padding: 6px 12px;
+      border: 1px solid #e1e4e8;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .memo-text-input:focus, .direct-time-input:focus, .time-picker-set select:focus {
+      border-color: #5B92E5;
+    }
+
+    .btn-reset {
+      padding: 5px 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      background-color: #f7f9fa;
+      border: 1px solid #e1e4e8;
+      color: #EA7B7B;
+      transition: background-color 0.2s;
+    }
+
+    .btn-reset:hover {
+      background-color: #fff5f5;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        <img src="my-image.png" alt="프로필 사진" class="profile-img">
-        <h1>다정현 핫클립 저장소</h1>
-        <p style="margin: 0; color: #666; font-size: 15px;">원하는 도장을 클릭하여 상세 클립 정보를 확인하세요.</p>
+  <div class="calendar-container">
+    <!-- 상단 컨트롤러 및 로그인 버튼 -->
+    <div class="top-bar">
+      <div class="calendar-controller">
+        <button class="nav-btn" id="prevBtn" title="이전 달">&lt;</button>
+        <div class="select-group">
+          <select id="yearSelect"></select>
+          <select id="monthSelect"></select>
+        </div>
+        <button class="nav-btn" id="nextBtn" title="다음 달">&gt;</button>
+      </div>
+
+      <button class="auth-btn" id="authBtn">관리자 로그인</button>
     </div>
 
-    <div class="goods-card">
-        <div class="goods-header">
-            <h2 class="goods-title">🎁 핫클립 굿즈 안내</h2>
-            <span class="goods-badge-pink">도장 3개마다 보상</span>
-        </div>
-
-        <div class="goods-description">
-            쿠폰에 <b>도장 3개마다</b> 찍혀 있는 분에 한하여 지급하는 전용 굿즈입니다.<br>
-            굿즈 배송은 제작 후 팬심을 통해 보내는 과정이 있어 <b>일정 시간이 소요</b>됩니다.<br>
-            자세한 내용은 공지사항을 참고해주세요.
-        </div>
-
-        <div class="goods-grid" id="goods-grid-container"></div>
-
-        <p class="goods-footer-msg">항상 클립 따주셔서 정말 감사합니다 💖 작게나마 보답이 되었으면 좋겠습니다!</p>
+    <!-- 요일 헤더 -->
+    <div class="weekdays">
+      <div class="sun">일</div>
+      <div>월</div>
+      <div>화</div>
+      <div>수</div>
+      <div>목</div>
+      <div>금</div>
+      <div class="sat">토</div>
     </div>
 
-    <div class="search-sort-bar">
-        <div class="search-box-wrapper">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="nickname-search" class="search-input" placeholder="닉네임 검색" oninput="handleSearch()">
+    <!-- 날짜 그리드 -->
+    <div class="days-grid" id="daysContainer"></div>
+
+    <!-- 하단 편집 섹션 (관리자 로그인 시 표시) -->
+    <div class="edit-section" id="editSection">
+      <div class="section-header">
+        <div class="section-title" id="selectedDateTitle">날짜를 선택하세요</div>
+        <button class="btn-reset" id="resetBtn">일정 초기화</button>
+      </div>
+      
+      <!-- 상태 라디오 -->
+      <div class="status-row">
+        <div class="status-options">
+          <label class="status-option">
+            <input type="radio" name="broadcastStatus" value="none" checked> None
+          </label>
+          <label class="status-option">
+            <input type="radio" name="broadcastStatus" value="on"> 방송 ON
+          </label>
+          <label class="status-option">
+            <input type="radio" name="broadcastStatus" value="off"> 방송 OFF
+          </label>
         </div>
-        <div class="sort-btn-group">
-            <button class="sort-btn active" id="sort-name" onclick="setSortMode('name')">가나다순</button>
-            <button class="sort-btn" id="sort-stamps" onclick="setSortMode('stamps')">도장순</button>
-            <button class="sort-btn" id="sort-latest" onclick="setSortMode('latest')">최신순</button>
+      </div>
+
+      <!-- 메모 1~3 에디터 -->
+      <div class="memo-list-editor">
+        <div class="memo-editor-row" data-index="0">
+          <span class="memo-label">메모 1</span>
+          <div class="time-picker-set">
+            <label>시간:</label>
+            <select class="hour-select"><option value="">선택</option></select>
+            <select class="min-select"><option value="00">00분</option><option value="30">30분</option></select>
+            <input type="text" class="direct-time-input" placeholder="직접입력">
+          </div>
+          <input type="text" class="memo-text-input" placeholder="첫 번째 일정 내용">
         </div>
-    </div>
 
-    <div id="boards-container">
-        <div class="no-result-msg" id="no-result-msg"></div>
-    </div>
-
-    <div class="modal-overlay" id="info-modal" onclick="closeModal(event)">
-        <div class="modal-box" onclick="event.stopPropagation()">
-            <div class="modal-header-row">
-                <div class="modal-title-group">
-                    <span class="title-dot" id="modal-dot"></span>
-                    <span class="modal-title-text" id="modal-title">1번 도장</span>
-                </div>
-                <button class="modal-close-icon" onclick="closeModalDirect()">✕</button>
-            </div>
-
-            <div class="modal-item-list">
-                <div class="modal-item">
-                    <span class="modal-item-icon">🗓️</span>
-                    <span id="modal-date">2026. 8. 31.</span>
-                </div>
-                <div class="modal-item">
-                    <span class="modal-item-icon">💭</span>
-                    <span id="modal-text">클립 정보가 없습니다.</span>
-                </div>
-                <div class="modal-item">
-                    <span class="modal-item-icon">🎬</span>
-                    <a href="#" id="modal-link" target="_blank" class="modal-item-link">링크 바로가기</a>
-                </div>
-            </div>
+        <div class="memo-editor-row" data-index="1">
+          <span class="memo-label">메모 2</span>
+          <div class="time-picker-set">
+            <label>시간:</label>
+            <select class="hour-select"><option value="">선택</option></select>
+            <select class="min-select"><option value="00">00분</option><option value="30">30분</option></select>
+            <input type="text" class="direct-time-input" placeholder="직접입력">
+          </div>
+          <input type="text" class="memo-text-input" placeholder="두 번째 일정 내용">
         </div>
+
+        <div class="memo-editor-row" data-index="2">
+          <span class="memo-label">메모 3</span>
+          <div class="time-picker-set">
+            <label>시간:</label>
+            <select class="hour-select"><option value="">선택</option></select>
+            <select class="min-select"><option value="00">00분</option><option value="30">30분</option></select>
+            <input type="text" class="direct-time-input" placeholder="직접입력">
+          </div>
+          <input type="text" class="memo-text-input" placeholder="세 번째 일정 내용">
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        const goodsList = [
-            { id: 1, name: "다정현 손편지", desc: "보상사용 할까말까 고민되는군요", img: "gift1.png", isSpecial: false },
-            { id: 2, name: "다정현 맥세이프 그립톡", desc: "이건 출시했으면 좋겠다", img: "gift2.png", isSpecial: false },
-            { id: 3, name: "다정현 키링", desc: "키링 잘 쓰고 있지롱", img: "gift3.png", isSpecial: false },
-            { id: 4, name: "다정현 아크릴 스탠드", desc: "어흐 내 아내", img: "gift4.png", isSpecial: false },
-            { id: 5, name: "다정현 캔뱃지", desc: "개쳐귀여움 ㅋㅋ", img: "gift5.png", isSpecial: false },
-            { id: 6, name: "다정현 머그컵", desc: "머그컵 잘 쓰고 있습니다", img: "gift6.png", isSpecial: false },
-            { id: 7, name: "다정현 향수", desc: "매일 쓰는 중", img: "gift7.png", isSpecial: false },
-            { id: 8, name: "다정현 장패드", desc: "이것도 출시했으면 좋겠다2222", img: "gift8.png", isSpecial: true }
-        ];
+  <!-- Firebase SDK 모듈 로드 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        function renderGoods() {
-            const container = document.getElementById("goods-grid-container");
-            container.innerHTML = "";
+    // -------------------------------------------------------------
+    // [중요] 아래 설정값을 본인의 Firebase 콘솔 설정값으로 교체하세요.
+    // -------------------------------------------------------------
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
 
-            goodsList.forEach(item => {
-                const itemDiv = document.createElement("div");
-                itemDiv.className = "goods-item";
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-                const badgeClass = item.isSpecial ? "goods-badge-no special" : "goods-badge-no";
-                const badgeText = item.isSpecial ? `No.${item.id} ◆ 도장 9개` : `No.${item.id}`;
+    const TOTAL_SLOTS = 42;
 
-                itemDiv.innerHTML = `
-                    <div class="goods-img-wrapper">
-                        <img src="${item.img}" alt="${item.name}" class="goods-img">
-                    </div>
-                    <span class="${badgeClass}">${badgeText}</span>
-                    <h3 class="goods-name">${item.name}</h3>
-                    <p class="goods-info">${item.desc}</p>
-                `;
+    const state = {
+      year: new Date().getFullYear(),
+      month: new Date().getMonth() + 1,
+      selectedDays: new Set([new Date().getDate()]),
+      lastAnchorDay: new Date().getDate(),
+      currentUser: null,
+      schedules: {} // 실시간 Firestore 데이터 캐시 (Key: YYYY-MM-DD)
+    };
 
-                container.appendChild(itemDiv);
-            });
+    const yearSelect = document.getElementById('yearSelect');
+    const monthSelect = document.getElementById('monthSelect');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const authBtn = document.getElementById('authBtn');
+    const editSection = document.getElementById('editSection');
+    const daysContainer = document.getElementById('daysContainer');
+    const selectedDateTitle = document.getElementById('selectedDateTitle');
+    const resetBtn = document.getElementById('resetBtn');
+    const statusRadios = document.querySelectorAll('input[name="broadcastStatus"]');
+    const memoRows = document.querySelectorAll('.memo-editor-row');
+
+    function getDateDocKey(year, month, day) {
+      const formattedMonth = String(month).padStart(2, '0');
+      const formattedDay = String(day).padStart(2, '0');
+      return `${year}-${formattedMonth}-${formattedDay}`;
+    }
+
+    function getDateData(year, month, day) {
+      const key = getDateDocKey(year, month, day);
+      return state.schedules[key] || {
+        status: 'none',
+        items: [
+          { time: '', text: '' },
+          { time: '', text: '' },
+          { time: '', text: '' }
+        ]
+      };
+    }
+
+    // 초기화
+    function init() {
+      populateYearOptions(1990, 2040);
+      populateMonthOptions();
+
+      memoRows.forEach(row => {
+        const hourSel = row.querySelector('.hour-select');
+        for (let h = 10; h <= 20; h++) {
+          const opt = document.createElement('option');
+          opt.value = String(h).padStart(2, '0');
+          opt.textContent = `${h}시`;
+          hourSel.appendChild(opt);
         }
 
-        const totalBoards = 20;
-        const stampsPerBoard = 30;
+        const minSel = row.querySelector('.min-select');
+        const directInput = row.querySelector('.direct-time-input');
+        const textInput = row.querySelector('.memo-text-input');
 
-        const boardNames = {
-            1: "다정현",
-            2: "조선우",
-            3: "우초이",
-            4: "카티야",
-            5: "이바",
-            6: "일레븐"
-        };
+        hourSel.addEventListener('change', () => handleDropdownChange(row));
+        minSel.addEventListener('change', () => handleDropdownChange(row));
+        directInput.addEventListener('input', () => handleDirectInputChange(row));
+        textInput.addEventListener('input', autoSaveData);
+      });
 
-        const boardActiveCounts = {
-            1: 6,
-            2: 5,
-            3: 3,
-            4: 2,
-            5: 1,
-            6: 0
-        };
+      syncSelectsWithState();
+      renderCalendar();
 
-        const stampData = {
-            "1-1": { date: "2026. 8. 31.", text: "26.08 [반캠] 업보청산", url: "https://chzzk.naver.com/clips/Jk7KNdlKcs" },
-            "1-2": { date: "2026. 8. 31.", text: "26.08 [저챗] 마음과 뇌의 싸움", url: "https://chzzk.naver.com/clips/bp72a4teVq" },
-            "1-3": { date: "2026. 8. 31.", text: "26.08 [마크] 폭탄 추격전", url: "https://chzzk.naver.com/clips/MiojMHRjVm" },
-            "1-4": { date: "2026. 8. 31.", text: "26.08 [반캠] 업보청산", url: "https://chzzk.naver.com/clips/Jk7KNdlKcs" },
-            "1-5": { date: "2026. 8. 31.", text: "26.08 [저챗] 마음과 뇌의 싸움", url: "https://chzzk.naver.com/clips/bp72a4teVq" },
-            "1-6": { date: "2026. 8. 31.", text: "26.08 [마크] 폭탄 추격전", url: "https://chzzk.naver.com/clips/MiojMHRjVm" },
-            "2-1": { date: "2026. 8. 31.", text: "26.08 [T1] 버른살의 애교", url: "https://chzzk.naver.com/clips/iam0ruNKlk" },
-            "2-2": { date: "2026. 8. 31.", text: "26.08 [T1] 버른살의 애교", url: "https://chzzk.naver.com/clips/iam0ruNKlk" },
-            "2-3": { date: "2026. 8. 31.", text: "26.08 [T1] 버른살의 애교", url: "https://chzzk.naver.com/clips/iam0ruNKlk" }
-        };
+      // 이벤트 바인딩
+      yearSelect.addEventListener('change', handleYearChange);
+      monthSelect.addEventListener('change', handleMonthChange);
+      prevBtn.addEventListener('click', handlePrevMonth);
+      nextBtn.addEventListener('click', handleNextMonth);
+      authBtn.addEventListener('click', handleAuthToggle);
+      statusRadios.forEach(radio => radio.addEventListener('change', autoSaveData));
+      resetBtn.addEventListener('click', handleResetData);
 
-        const boardElementsMap = {};
-        let currentSortMode = 'name';
-        let searchQuery = '';
-
-        // 날짜 문자열("2026. 8. 31.")을 비교 가능한 타임스탬프 숫자로 변환하는 헬퍼 함수
-        function parseStampDate(dateStr) {
-            if (!dateStr || dateStr.includes("없음")) return 0;
-            const parts = dateStr.replace(/\s+/g, '').replace(/\.$/, '').split('.');
-            if (parts.length === 3) {
-                const year = parseInt(parts[0], 10);
-                const month = parseInt(parts[1], 10) - 1;
-                const day = parseInt(parts[2], 10);
-                return new Date(year, month, day).getTime();
-            }
-            return 0;
+      // 1. Firebase Auth 로그인 상태 감지
+      onAuthStateChanged(auth, user => {
+        state.currentUser = user;
+        if (user) {
+          authBtn.textContent = "로그아웃";
+          authBtn.classList.add('logged-in');
+          editSection.classList.add('active');
+        } else {
+          authBtn.textContent = "관리자 로그인";
+          authBtn.classList.remove('logged-in');
+          editSection.classList.remove('active');
         }
+      });
 
-        // 각 도장판에서 가장 마지막(최신)으로 찍힌 도장의 날짜 타임스탬프 계산
-        function getLatestStampTimestamp(boardId, activeCount) {
-            if (activeCount <= 0) return 0;
-            
-            // 마지막 도장부터 역순으로 날짜가 등록된 도장 탐색
-            for (let s = activeCount; s >= 1; s--) {
-                const key = `${boardId}-${s}`;
-                if (stampData[key] && stampData[key].date) {
-                    const time = parseStampDate(stampData[key].date);
-                    if (time > 0) return time;
-                }
-            }
-            return 0;
-        }
-
-        function createAllBoards() {
-            const container = document.getElementById("boards-container");
-
-            for (let b = 1; b <= totalBoards; b++) {
-                const name = boardNames[b] || `도장판 #${b}`;
-                const count = boardActiveCounts[b] || 0;
-
-                const card = document.createElement("div");
-                card.className = "board-card";
-                card.id = `board-card-${b}`;
-
-                const header = document.createElement("div");
-                header.className = "board-header";
-                header.innerHTML = `
-                    <h2 class="board-title">${name}</h2>
-                    <span class="board-badge">도장 ${count} / ${stampsPerBoard}개</span>
-                `;
-                card.appendChild(header);
-
-                const grid = document.createElement("div");
-                grid.className = "stamp-grid";
-
-                for (let s = 1; s <= stampsPerBoard; s++) {
-                    const btn = document.createElement("button");
-                    btn.className = "stamp-btn";
-
-                    if (s % 3 === 0) btn.classList.add("special");
-
-                    if (s <= count) {
-                        btn.classList.add("active");
-                        btn.innerHTML = `<img src="Jerry.png" alt="도장" class="stamp-icon"><span class="stamp-number">${s}</span>`;
-                    } else {
-                        btn.innerHTML = `<span class="stamp-number">${s}</span>`;
-                    }
-
-                    btn.onclick = () => openModal(b, s, count);
-                    grid.appendChild(btn);
-                }
-
-                card.appendChild(grid);
-                container.appendChild(card);
-
-                boardElementsMap[b] = {
-                    element: card,
-                    id: b,
-                    name: name,
-                    count: count,
-                    latestTime: getLatestStampTimestamp(b, count) // 최신 날짜 타임스탬프 저장
-                };
-            }
-        }
-
-        function setSortMode(mode) {
-            currentSortMode = mode;
-            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`sort-${mode}`).classList.add('active');
-            updateBoardDisplay();
-        }
-
-        function handleSearch() {
-            searchQuery = document.getElementById('nickname-search').value.trim().toLowerCase();
-            updateBoardDisplay();
-        }
-
-        function updateBoardDisplay() {
-            const container = document.getElementById("boards-container");
-            const noResultElem = document.getElementById("no-result-msg");
-            
-            let list = Object.values(boardElementsMap);
-
-            // [정렬 로직]
-            if (currentSortMode === 'name') {
-                list.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
-            } else if (currentSortMode === 'stamps') {
-                list.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'ko'));
-            } else if (currentSortMode === 'latest') {
-                // 최근 날짜순(내림차순) -> 날짜가 같으면 도장 개수 많은 순 -> 이름순
-                list.sort((a, b) => b.latestTime - a.latestTime || b.count - a.count || a.name.localeCompare(b.name, 'ko'));
-            }
-
-            let visibleCount = 0;
-
-            list.forEach(item => {
-                const isMatch = !searchQuery || item.name.toLowerCase().includes(searchQuery);
-                if (isMatch) {
-                    item.element.style.display = 'block';
-                    container.appendChild(item.element);
-                    visibleCount++;
-                } else {
-                    item.element.style.display = 'none';
-                }
-            });
-
-            if (visibleCount === 0) {
-                noResultElem.textContent = `'${searchQuery}' 검색 결과와 일치하는 도장판이 없습니다.`;
-                noResultElem.style.display = 'block';
-            } else {
-                noResultElem.style.display = 'none';
-            }
-        }
-
-        function openModal(boardIndex, stampIndex, activeCount) {
-            const key = `${boardIndex}-${stampIndex}`;
-            const data = stampData[key] || {
-                date: "날짜 정보 없음",
-                text: "등록된 클립 정보가 없습니다.",
-                url: ""
-            };
-
-            document.getElementById("modal-title").textContent = `${stampIndex}번 도장`;
-            document.getElementById("modal-date").textContent = data.date;
-            document.getElementById("modal-text").textContent = data.text;
-
-            const dotElem = document.getElementById("modal-dot");
-            if (stampIndex <= activeCount) {
-                dotElem.style.backgroundColor = (stampIndex % 3 === 0) ? "#b08968" : "#ff758f";
-            } else {
-                dotElem.style.backgroundColor = (stampIndex % 3 === 0) ? "#ede0d4" : "#ffe3ea";
-            }
-
-            const linkElem = document.getElementById("modal-link");
-            if (data.url) {
-                linkElem.href = data.url;
-                linkElem.textContent = data.url.replace(/^https?:\/\//, "");
-                linkElem.style.display = "inline";
-            } else {
-                linkElem.textContent = "링크 없음";
-                linkElem.removeAttribute("href");
-            }
-
-            document.getElementById("info-modal").style.display = "flex";
-        }
-
-        function closeModal(event) {
-            if (event.target.id === "info-modal") {
-                document.getElementById("info-modal").style.display = "none";
-            }
-        }
-
-        function closeModalDirect() {
-            document.getElementById("info-modal").style.display = "none";
-        }
-
-        window.addEventListener("DOMContentLoaded", () => {
-            renderGoods();
-            createAllBoards();
-            updateBoardDisplay();
+      // 2. Firestore 실시간 데이터 구독 (모든 사용자에게 실시간 반영)
+      onSnapshot(collection(db, "schedules"), snapshot => {
+        const newSchedules = {};
+        snapshot.forEach(doc => {
+          newSchedules[doc.id] = doc.data();
         });
-    </script>
+        state.schedules = newSchedules;
+        renderCalendar();
+        loadSelectedDatesData();
+      });
+    }
+
+    // 로그인 / 로그아웃 처리
+    async function handleAuthToggle() {
+      if (state.currentUser) {
+        await signOut(auth);
+      } else {
+        const email = prompt("관리자 이메일을 입력하세요:");
+        if (!email) return;
+        const password = prompt("비밀번호를 입력하세요:");
+        if (!password) return;
+
+        try {
+          await signInWithEmailAndPassword(auth, email.trim(), password);
+        } catch (error) {
+          alert("로그인 실패: 이메일 또는 비밀번호가 일치하지 않습니다.");
+        }
+      }
+    }
+
+    function populateYearOptions(startYear, endYear) {
+      for (let y = startYear; y <= endYear; y++) {
+        const option = document.createElement('option');
+        option.value = y;
+        option.textContent = `${y}년`;
+        yearSelect.appendChild(option);
+      }
+    }
+
+    function populateMonthOptions() {
+      for (let m = 1; m <= 12; m++) {
+        const option = document.createElement('option');
+        option.value = m;
+        option.textContent = `${m}월`;
+        monthSelect.appendChild(option);
+      }
+    }
+
+    function syncSelectsWithState() {
+      yearSelect.value = state.year;
+      monthSelect.value = state.month;
+    }
+
+    function getDaysInMonth(year, month) {
+      return new Date(year, month, 0).getDate();
+    }
+
+    // 날짜 클릭 (Ctrl / Shift 지원)
+    function handleDayClick(e, dayNum) {
+      const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+      const isShift = e.shiftKey;
+
+      if (isShift && state.lastAnchorDay !== null) {
+        const start = Math.min(state.lastAnchorDay, dayNum);
+        const end = Math.max(state.lastAnchorDay, dayNum);
+        
+        if (!isCtrlOrCmd) state.selectedDays.clear();
+        for (let i = start; i <= end; i++) {
+          state.selectedDays.add(i);
+        }
+      } else if (isCtrlOrCmd) {
+        if (state.selectedDays.has(dayNum)) {
+          state.selectedDays.delete(dayNum);
+          if (state.selectedDays.size === 0) state.selectedDays.add(dayNum);
+        } else {
+          state.selectedDays.add(dayNum);
+        }
+        state.lastAnchorDay = dayNum;
+      } else {
+        state.selectedDays.clear();
+        state.selectedDays.add(dayNum);
+        state.lastAnchorDay = dayNum;
+      }
+
+      renderCalendar();
+      loadSelectedDatesData();
+    }
+
+    function renderCalendar() {
+      daysContainer.innerHTML = '';
+
+      const firstDayIndex = new Date(state.year, state.month - 1, 1).getDay();
+      const totalDays = getDaysInMonth(state.year, state.month);
+
+      const validSelected = new Set();
+      state.selectedDays.forEach(d => {
+        if (d <= totalDays) validSelected.add(d);
+      });
+      if (validSelected.size === 0) validSelected.add(1);
+      state.selectedDays = validSelected;
+
+      // 이전 달 빈칸
+      for (let i = 0; i < firstDayIndex; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'day empty';
+        daysContainer.appendChild(emptyCell);
+      }
+
+      // 날짜 셀 렌더링
+      for (let d = 1; d <= totalDays; d++) {
+        const dayCell = document.createElement('div');
+        dayCell.className = 'day';
+
+        const data = getDateData(state.year, state.month, d);
+
+        const tooltipLines = [];
+        data.items.forEach(item => {
+          if (item.time || item.text) {
+            tooltipLines.push(`${item.time ? item.time + ' ' : ''}${item.text || ''}`);
+          }
+        });
+        if (tooltipLines.length > 0) {
+          dayCell.title = tooltipLines.join('\n');
+        }
+
+        if (data.status === 'on') dayCell.classList.add('status-on');
+        else if (data.status === 'off') dayCell.classList.add('status-off');
+        else dayCell.classList.add('status-none');
+
+        const dayOfWeek = new Date(state.year, state.month - 1, d).getDay();
+        const numberDiv = document.createElement('div');
+        numberDiv.className = 'day-number';
+        if (dayOfWeek === 0) numberDiv.classList.add('sun');
+        if (dayOfWeek === 6) numberDiv.classList.add('sat');
+        numberDiv.textContent = d;
+        dayCell.appendChild(numberDiv);
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'schedule-content';
+
+        if (data.status === 'off') {
+          const offDiv = document.createElement('div');
+          offDiv.className = 'off-label';
+          const firstMemo = data.items[0] ? data.items[0].text : '';
+          offDiv.textContent = firstMemo ? firstMemo : '휴방';
+          contentDiv.appendChild(offDiv);
+        } else {
+          data.items.forEach(item => {
+            if (item.time || item.text) {
+              const line = document.createElement('div');
+              line.className = 'schedule-item-line';
+
+              const timeSpan = document.createElement('span');
+              timeSpan.className = 'schedule-time-tag';
+              timeSpan.textContent = item.time || '';
+
+              const textSpan = document.createElement('span');
+              textSpan.className = 'schedule-text-tag';
+              textSpan.textContent = item.text || '';
+
+              line.appendChild(timeSpan);
+              line.appendChild(textSpan);
+              contentDiv.appendChild(line);
+            }
+          });
+        }
+
+        dayCell.appendChild(contentDiv);
+
+        if (state.selectedDays.has(d)) {
+          dayCell.classList.add('selected');
+        }
+
+        dayCell.addEventListener('click', (e) => handleDayClick(e, d));
+        daysContainer.appendChild(dayCell);
+      }
+
+      // 다음 달 빈칸
+      const currentRenderedSlots = firstDayIndex + totalDays;
+      const remainingSlots = TOTAL_SLOTS - currentRenderedSlots;
+
+      for (let j = 0; j < remainingSlots; j++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'day empty';
+        daysContainer.appendChild(emptyCell);
+      }
+    }
+
+    function loadSelectedDatesData() {
+      const selectedArray = Array.from(state.selectedDays).sort((a, b) => a - b);
+      
+      if (selectedArray.length === 1) {
+        selectedDateTitle.textContent = `${state.year}년 ${state.month}월 ${selectedArray[0]}일 일정 편집`;
+      } else {
+        selectedDateTitle.textContent = `${state.year}년 ${state.month}월 (총 ${selectedArray.length}개 날짜 일괄 편집)`;
+      }
+
+      const anchorDay = state.lastAnchorDay || selectedArray[0];
+      const data = getDateData(state.year, state.month, anchorDay);
+      
+      const radio = document.querySelector(`input[name="broadcastStatus"][value="${data.status}"]`);
+      if (radio) radio.checked = true;
+
+      memoRows.forEach((row, idx) => {
+        const item = data.items[idx] || { time: '', text: '' };
+        const hourSel = row.querySelector('.hour-select');
+        const minSel = row.querySelector('.min-select');
+        const directInput = row.querySelector('.direct-time-input');
+        const textInput = row.querySelector('.memo-text-input');
+
+        directInput.value = item.time || '';
+        syncDropdownFromText(hourSel, minSel, item.time || '');
+        textInput.value = item.text || '';
+      });
+    }
+
+    function syncDropdownFromText(hourSel, minSel, timeStr) {
+      if (timeStr && timeStr.includes(':')) {
+        const [h, m] = timeStr.split(':');
+        if (parseInt(h, 10) >= 10 && parseInt(h, 10) <= 20) {
+          hourSel.value = h;
+          minSel.value = (m === '30') ? '30' : '00';
+          return;
+        }
+      }
+      hourSel.value = '';
+      minSel.value = '00';
+    }
+
+    function handleDropdownChange(row) {
+      if (!state.currentUser) return;
+      const hourSel = row.querySelector('.hour-select');
+      const minSel = row.querySelector('.min-select');
+      const directInput = row.querySelector('.direct-time-input');
+
+      if (hourSel.value) {
+        directInput.value = `${hourSel.value}:${minSel.value}`;
+      } else {
+        directInput.value = '';
+      }
+      autoSaveData();
+    }
+
+    function handleDirectInputChange(row) {
+      if (!state.currentUser) return;
+      const hourSel = row.querySelector('.hour-select');
+      const minSel = row.querySelector('.min-select');
+      const directInput = row.querySelector('.direct-time-input');
+
+      syncDropdownFromText(hourSel, minSel, directInput.value.trim());
+      autoSaveData();
+    }
+
+    // Firestore 실시간 자동 저장
+    async function autoSaveData() {
+      if (!state.currentUser) return;
+
+      const selectedRadio = document.querySelector('input[name="broadcastStatus"]:checked');
+      const status = selectedRadio ? selectedRadio.value : 'none';
+
+      const items = [];
+      let hasData = false;
+
+      memoRows.forEach(row => {
+        const directInput = row.querySelector('.direct-time-input');
+        const textInput = row.querySelector('.memo-text-input');
+
+        const time = directInput.value.trim();
+        const text = textInput.value.trim();
+
+        if (time || text) hasData = true;
+        items.push({ time, text });
+      });
+
+      const promises = Array.from(state.selectedDays).map(day => {
+        const docId = getDateDocKey(state.year, state.month, day);
+        const docRef = doc(db, "schedules", docId);
+
+        if (status === 'none' && !hasData) {
+          return deleteDoc(docRef);
+        } else {
+          return setDoc(docRef, { status, items });
+        }
+      });
+
+      await Promise.all(promises);
+    }
+
+    // Firestore 실시간 데이터 초기화
+    async function handleResetData() {
+      if (!state.currentUser) return;
+
+      const promises = Array.from(state.selectedDays).map(day => {
+        const docId = getDateDocKey(state.year, state.month, day);
+        return deleteDoc(doc(db, "schedules", docId));
+      });
+
+      await Promise.all(promises);
+
+      document.querySelector('input[name="broadcastStatus"][value="none"]').checked = true;
+      memoRows.forEach(row => {
+        row.querySelector('.hour-select').value = '';
+        row.querySelector('.min-select').value = '00';
+        row.querySelector('.direct-time-input').value = '';
+        row.querySelector('.memo-text-input').value = '';
+      });
+    }
+
+    function handlePrevMonth() {
+      state.month--;
+      if (state.month < 1) {
+        state.month = 12;
+        state.year--;
+      }
+      state.selectedDays = new Set([1]);
+      state.lastAnchorDay = 1;
+      syncSelectsWithState();
+      renderCalendar();
+      loadSelectedDatesData();
+    }
+
+    function handleNextMonth() {
+      state.month++;
+      if (state.month > 12) {
+        state.month = 1;
+        state.year++;
+      }
+      state.selectedDays = new Set([1]);
+      state.lastAnchorDay = 1;
+      syncSelectsWithState();
+      renderCalendar();
+      loadSelectedDatesData();
+    }
+
+    function handleYearChange(e) {
+      state.year = parseInt(e.target.value, 10);
+      renderCalendar();
+      loadSelectedDatesData();
+    }
+
+    function handleMonthChange(e) {
+      state.month = parseInt(e.target.value, 10);
+      renderCalendar();
+      loadSelectedDatesData();
+    }
+
+    init();
+  </script>
 </body>
 </html>
