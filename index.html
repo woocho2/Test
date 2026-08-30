@@ -551,14 +551,12 @@
 </head>
 <body>
 
-    <!-- 1. 상단 배너 메인 보드 -->
     <div class="container">
         <img src="my-image.png" alt="프로필 사진" class="profile-img">
         <h1>다정현 핫클립 저장소</h1>
         <p style="margin: 0; color: #666; font-size: 15px;">원하는 도장을 클릭하여 상세 클립 정보를 확인하세요.</p>
     </div>
 
-    <!-- 2. 핫클립 굿즈 안내 박스 -->
     <div class="goods-card">
         <div class="goods-header">
             <h2 class="goods-title">🎁 핫클립 굿즈 안내</h2>
@@ -576,7 +574,6 @@
         <p class="goods-footer-msg">항상 클립 따주셔서 정말 감사합니다 💖 작게나마 보답이 되었으면 좋겠습니다!</p>
     </div>
 
-    <!-- 3. 닉네임 검색 및 정렬 바 (가나다순 / 도장순 / 최신순) -->
     <div class="search-sort-bar">
         <div class="search-box-wrapper">
             <span class="search-icon">🔍</span>
@@ -589,12 +586,10 @@
         </div>
     </div>
 
-    <!-- 4. 도장판 목록 영역 -->
     <div id="boards-container">
         <div class="no-result-msg" id="no-result-msg"></div>
     </div>
 
-    <!-- 5. 상세 정보 모달 창 -->
     <div class="modal-overlay" id="info-modal" onclick="closeModal(event)">
         <div class="modal-box" onclick="event.stopPropagation()">
             <div class="modal-header-row">
@@ -622,7 +617,6 @@
         </div>
     </div>
 
-    <!-- [스크립트 로직] -->
     <script>
         const goodsList = [
             { id: 1, name: "다정현 손편지", desc: "보상사용 할까말까 고민되는군요", img: "gift1.png", isSpecial: false },
@@ -693,8 +687,36 @@
         };
 
         const boardElementsMap = {};
-        let currentSortMode = 'name'; // 기본 정렬: 가나다순
+        let currentSortMode = 'name';
         let searchQuery = '';
+
+        // 날짜 문자열("2026. 8. 31.")을 비교 가능한 타임스탬프 숫자로 변환하는 헬퍼 함수
+        function parseStampDate(dateStr) {
+            if (!dateStr || dateStr.includes("없음")) return 0;
+            const parts = dateStr.replace(/\s+/g, '').replace(/\.$/, '').split('.');
+            if (parts.length === 3) {
+                const year = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1;
+                const day = parseInt(parts[2], 10);
+                return new Date(year, month, day).getTime();
+            }
+            return 0;
+        }
+
+        // 각 도장판에서 가장 마지막(최신)으로 찍힌 도장의 날짜 타임스탬프 계산
+        function getLatestStampTimestamp(boardId, activeCount) {
+            if (activeCount <= 0) return 0;
+            
+            // 마지막 도장부터 역순으로 날짜가 등록된 도장 탐색
+            for (let s = activeCount; s >= 1; s--) {
+                const key = `${boardId}-${s}`;
+                if (stampData[key] && stampData[key].date) {
+                    const time = parseStampDate(stampData[key].date);
+                    if (time > 0) return time;
+                }
+            }
+            return 0;
+        }
 
         function createAllBoards() {
             const container = document.getElementById("boards-container");
@@ -742,7 +764,8 @@
                     element: card,
                     id: b,
                     name: name,
-                    count: count
+                    count: count,
+                    latestTime: getLatestStampTimestamp(b, count) // 최신 날짜 타임스탬프 저장
                 };
             }
         }
@@ -765,13 +788,14 @@
             
             let list = Object.values(boardElementsMap);
 
-            // [정렬 로직: 가나다순 / 도장순 / 최신순]
+            // [정렬 로직]
             if (currentSortMode === 'name') {
                 list.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
             } else if (currentSortMode === 'stamps') {
                 list.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'ko'));
             } else if (currentSortMode === 'latest') {
-                list.sort((a, b) => b.id - a.id); // 최신 등록순 (번호 역순)
+                // 최근 날짜순(내림차순) -> 날짜가 같으면 도장 개수 많은 순 -> 이름순
+                list.sort((a, b) => b.latestTime - a.latestTime || b.count - a.count || a.name.localeCompare(b.name, 'ko'));
             }
 
             let visibleCount = 0;
