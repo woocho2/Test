@@ -104,7 +104,7 @@
             align-items: center;
             padding: 0;
             transition: all 0.15s ease-in-out;
-            overflow: hidden; /* 이미지가 모서리 밖으로 나가지 않도록 방지 */
+            overflow: hidden;
         }
 
         .stamp-btn:hover {
@@ -116,8 +116,8 @@
         .stamp-icon {
             width: 70%;
             height: 70%;
-            object-fit: contain; /* 비율 유지하며 칸 안에 쏙 들어가게 맞춤 */
-            pointer-events: none; /* 클릭 방해 방지 */
+            object-fit: contain;
+            pointer-events: none;
         }
 
         /* [도장 획득 상태 (일반 - 분홍색)] */
@@ -150,7 +150,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.45);
+            background: rgba(0, 0, 0, 0.4);
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -160,64 +160,91 @@
 
         .modal-box {
             background: #ffffff;
-            max-width: 420px;
+            max-width: 360px;
             width: 100%;
-            border-radius: 18px;
-            padding: 28px;
-            border: 1px solid #ffccd5;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
-            text-align: center;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             box-sizing: border-box;
-        }
-
-        .modal-header {
-            font-size: 20px;
-            font-weight: bold;
-            color: #c9184a;
-            margin-bottom: 6px;
-        }
-
-        .modal-date {
-            font-size: 13px;
-            color: #888888;
-            margin-bottom: 16px;
-        }
-
-        .modal-info {
-            font-size: 15px;
-            color: #444444;
-            line-height: 1.6;
-            margin-bottom: 24px;
-            background-color: #fff0f3;
-            padding: 14px;
-            border-radius: 10px;
+            position: relative;
             text-align: left;
         }
 
-        .modal-link-btn {
+        .modal-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .title-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #60a5fa;
+            border-radius: 50%;
             display: inline-block;
-            background-color: #ff758f;
-            color: #ffffff;
-            text-decoration: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+        }
+
+        .modal-title-text {
+            font-size: 18px;
             font-weight: bold;
-            font-size: 15px;
-            width: calc(100% - 48px);
-            margin-bottom: 10px;
-            transition: background-color 0.2s;
+            color: #1f2937;
         }
 
-        .modal-link-btn:hover {
-            background-color: #ff4d6d;
-        }
-
-        .modal-close-btn {
-            background: none;
-            border: none;
-            color: #888888;
-            font-size: 14px;
+        .modal-close-icon {
+            width: 28px;
+            height: 28px;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1;
+            padding: 0;
+            transition: background 0.15s;
+        }
+
+        .modal-close-icon:hover {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .modal-item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            font-size: 15px;
+            color: #374151;
+        }
+
+        .modal-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            word-break: break-all;
+        }
+
+        .modal-item-icon {
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .modal-item-link {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .modal-item-link:hover {
             text-decoration: underline;
         }
     </style>
@@ -237,12 +264,28 @@
     <!-- 3. 도장 클릭 시 노출되는 모달 창 -->
     <div class="modal-overlay" id="info-modal" onclick="closeModal(event)">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <div class="modal-header" id="modal-title">[ 1번 도장 ]</div>
-            <div class="modal-date" id="modal-date">날짜: 2026-08-01</div>
-            <div class="modal-info" id="modal-desc">간단한 정보가 표시됩니다.</div>
-            <a href="#" id="modal-link" target="_blank" class="modal-link-btn">영상 바로가기</a>
-            <br>
-            <button class="modal-close-btn" onclick="closeModalDirect()">닫기</button>
+            <div class="modal-header-row">
+                <div class="modal-title-group">
+                    <span class="title-dot"></span>
+                    <span class="modal-title-text" id="modal-title">1번 도장</span>
+                </div>
+                <button class="modal-close-icon" onclick="closeModalDirect()">✕</button>
+            </div>
+
+            <div class="modal-item-list">
+                <div class="modal-item">
+                    <span class="modal-item-icon">🗓️</span>
+                    <span id="modal-date">2026. 8. 31.</span>
+                </div>
+                <div class="modal-item">
+                    <span class="modal-item-icon">💭</span>
+                    <span id="modal-text">클립 정보가 없습니다.</span>
+                </div>
+                <div class="modal-item">
+                    <span class="modal-item-icon">🎬</span>
+                    <a href="#" id="modal-link" target="_blank" class="modal-item-link">링크 바로가기</a>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -251,15 +294,27 @@
         const totalBoards = 20;     // 생성할 총 도장판 개수
         const stampsPerBoard = 30;   // 각 판당 칸 수
 
-        // [도장판별 활성화 개수 설정]
+        // ========================================================
+        // [1. 도장판 이름(닉네임/타이틀) 관리]
+        // ========================================================
+        const boardNames = {
+            1: "르나이라",
+            2: "라면먹은찹쌀이",
+            3: "메론딸기푸딩"
+            // 지정하지 않은 번호는 기본값(도장판 #번호)으로 자동 표시됩니다.
+        };
+
+        // ========================================================
+        // [2. 도장판별 활성화(색칠) 개수 설정]
+        // ========================================================
         const boardActiveCounts = {
             1: 3,
             2: 1,
             3: 0
         };
 
-// ========================================================
-        // [★ 도장별 세부 데이터 관리 ★]
+        // ========================================================
+        // [3. 도장별 세부 데이터 관리]
         // "도장판번호-도장번호": { date: "날짜", text: "문구", url: "링크" }
         // ========================================================
         const stampData = {
@@ -286,9 +341,8 @@
                 text: "26.08 [T1] 버른살의 애교",
                 url: "https://chzzk.naver.com/clips/iam0ruNKlk"
             }
-            // 필요에 따라 아래에 계속 추가하시면 됩니다.
         };
-        
+
         // 20개 도장판 생성 함수
         function initBoards() {
             const container = document.getElementById("boards-container");
@@ -299,12 +353,14 @@
                 card.className = "board-card";
 
                 const activeCount = boardActiveCounts[b] || 0;
+                // boardNames에 등록된 이름이 있으면 사용, 없으면 '도장판 #번호' 사용
+                const currentBoardTitle = boardNames[b] || `도장판 #${b}`;
 
                 // 상단 타이틀 및 달성 배지
                 const header = document.createElement("div");
                 header.className = "board-header";
                 header.innerHTML = `
-                    <h2 class="board-title">도장판 #${b}</h2>
+                    <h2 class="board-title">${currentBoardTitle}</h2>
                     <span class="board-badge">도장 ${activeCount} / ${stampsPerBoard}개</span>
                 `;
                 card.appendChild(header);
@@ -341,10 +397,26 @@
 
         // 모달 데이터 노출
         function openModal(boardIndex, stampIndex) {
-            document.getElementById("modal-title").textContent = `[ 도장판 #${boardIndex} - ${stampIndex}번 도장 ]`;
-            document.getElementById("modal-date").textContent = `날짜: 2026-08-${stampIndex < 10 ? '0' + stampIndex : stampIndex}`;
-            document.getElementById("modal-desc").textContent = `${boardIndex}번째 판의 ${stampIndex}번 도장 상세 안내 정보입니다.`;
-            document.getElementById("modal-link").href = "https://youtube.com";
+            const key = `${boardIndex}-${stampIndex}`;
+            const data = stampData[key] || {
+                date: "날짜 정보 없음",
+                text: "등록된 클립 정보가 없습니다.",
+                url: ""
+            };
+
+            document.getElementById("modal-title").textContent = `${stampIndex}번 도장`;
+            document.getElementById("modal-date").textContent = data.date;
+            document.getElementById("modal-text").textContent = data.text;
+
+            const linkElem = document.getElementById("modal-link");
+            if (data.url) {
+                linkElem.href = data.url;
+                linkElem.textContent = data.url.replace(/^https?:\/\//, "");
+                linkElem.style.display = "inline";
+            } else {
+                linkElem.textContent = "링크 없음";
+                linkElem.removeAttribute("href");
+            }
 
             document.getElementById("info-modal").style.display = "flex";
         }
