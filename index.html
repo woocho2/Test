@@ -258,6 +258,37 @@
             3: 0
         };
 
+// ========================================================
+        // [★ 도장별 세부 데이터 관리 ★]
+        // "도장판번호-도장번호": { date: "날짜", text: "문구", url: "링크" }
+        // ========================================================
+        const stampData = {
+            // [1번 도장판]
+            "1-1": {
+                date: "2026. 4. 13.",
+                text: "25.01 [로아] 지지지지직",
+                url: "https://chzzk.naver.com/clips/xGv2UdxjH4"
+            },
+            "1-2": {
+                date: "2026. 4. 14.",
+                text: "25.01 [종합게임] 공포게임 명장면",
+                url: "https://chzzk.naver.com"
+            },
+            "1-3": {
+                date: "2026. 4. 15.",
+                text: "★ 3일차 보상 클립",
+                url: "https://chzzk.naver.com"
+            },
+
+            // [2번 도장판]
+            "2-1": {
+                date: "2026. 5. 01.",
+                text: "2번 도장판 첫 방송 클립",
+                url: "https://chzzk.naver.com"
+            }
+            // 필요에 따라 아래에 계속 추가하시면 됩니다.
+        };
+        
         // 20개 도장판 생성 함수
         function initBoards() {
             const container = document.getElementById("boards-container");
