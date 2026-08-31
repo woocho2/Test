@@ -12,9 +12,43 @@
             background-color: #fff0f3;
             color: #4a4a4a;
             margin: 0;
-            padding: 50px 20px 100px;
+            padding: 20px 20px 100px;
             box-sizing: border-box;
             overflow-y: scroll;
+        }
+
+        /* [최상단 관리자 로그인 바] */
+        .top-auth-container {
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto 12px;
+            display: flex;
+            justify-content: flex-end;
+            box-sizing: border-box;
+        }
+
+        .auth-btn {
+            padding: 7px 15px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #ffccd5;
+            background-color: #ffffff;
+            color: #c9184a;
+            box-shadow: 0 2px 6px rgba(255, 117, 143, 0.1);
+            transition: all 0.2s;
+        }
+
+        .auth-btn.logged-in {
+            background-color: #c9184a;
+            color: #ffffff;
+            border-color: #c9184a;
+        }
+
+        .auth-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
         }
 
         /* [공통 카드 컨테이너] */
@@ -33,35 +67,6 @@
 
         .container {
             text-align: center;
-        }
-
-        /* 상단 관리자 인증 버튼 */
-        .auth-bar {
-            position: absolute;
-            top: 20px;
-            right: 24px;
-        }
-
-        .auth-btn {
-            padding: 7px 14px;
-            font-size: 13px;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 1px solid #ffccd5;
-            background-color: #ffffff;
-            color: #c9184a;
-            transition: all 0.2s;
-        }
-
-        .auth-btn.logged-in {
-            background-color: #c9184a;
-            color: #ffffff;
-            border-color: #c9184a;
-        }
-
-        .auth-btn:hover {
-            opacity: 0.9;
         }
 
         /* [상단 배너 이미지] */
@@ -146,7 +151,6 @@
             border-color: #ffccd5;
         }
 
-        /* 관리자 로그인 시 굿즈 편집 오버레이 */
         .is-admin .goods-item {
             cursor: pointer;
         }
@@ -589,7 +593,6 @@
             color: #111827;
         }
 
-        /* 1) 일반 열람 뷰 */
         .modal-view-mode {
             display: flex;
             flex-direction: column;
@@ -620,7 +623,6 @@
             text-decoration: underline;
         }
 
-        /* 2) 관리자 폼 */
         .modal-form {
             display: flex;
             flex-direction: column;
@@ -675,7 +677,16 @@
         ======================================= */
         @media (max-width: 768px) {
             body {
-                padding: 24px 12px 60px;
+                padding: 16px 12px 60px;
+            }
+
+            .top-auth-container {
+                margin-bottom: 10px;
+            }
+
+            .auth-btn {
+                padding: 6px 12px;
+                font-size: 12px;
             }
 
             .container, .board-card, .goods-card {
@@ -730,11 +741,11 @@
 </head>
 <body>
 
-    <div class="container">
-        <div class="auth-bar">
-            <button class="auth-btn" id="authBtn">관리자 로그인</button>
-        </div>
+    <div class="top-auth-container">
+        <button class="auth-btn" id="authBtn">관리자 로그인</button>
+    </div>
 
+    <div class="container">
         <img src="my-image.png" alt="프로필 사진" class="profile-img">
         <h1>다정현 핫클립 저장소</h1>
         <p style="margin: 0; color: #666; font-size: 15px;">원하는 도장을 클릭하여 상세 클립 정보를 확인하세요.</p>
@@ -898,7 +909,6 @@
             activeEditingGoods: null
         };
 
-        // DOM 요소 캐싱
         const authBtn = document.getElementById('authBtn');
         const adminControlsBar = document.getElementById('adminControlsBar');
         const btnAddBoard = document.getElementById('btnAddBoard');
@@ -932,7 +942,6 @@
         const editGoodsDesc = document.getElementById('editGoodsDesc');
         const btnSaveGoods = document.getElementById('btnSaveGoods');
 
-        // [최적화] 날짜 문자열 타임스탬프 변환 (정규식 제거 및 단순 파싱)
         function parseStampDate(dateStr) {
             if (!dateStr || dateStr.includes("없음")) return 0;
             const parts = dateStr.split('.').map(p => parseInt(p.trim(), 10));
@@ -942,7 +951,6 @@
             return 0;
         }
 
-        // [최적화] 최신 도장 타임스탬프 계산
         function getLatestStampTimestamp(boardId, activeCount) {
             if (activeCount <= 0) return 0;
             for (let s = activeCount; s >= 1; s--) {
@@ -955,9 +963,6 @@
             return 0;
         }
 
-        // =======================================
-        // [굿즈 렌더링 & 편집 모달]
-        // =======================================
         function renderGoods() {
             const container = document.getElementById("goods-grid-container");
             container.innerHTML = "";
@@ -1017,30 +1022,25 @@
                 closeGoodsEditModal();
             } catch (err) {
                 console.error("굿즈 정보 저장 실패:", err);
-                alert("굿즈 저장 중 오류가 발생했습니다.");
+                alert("굿즈 저장 중 오류가 발생했습니다: " + err.message);
             }
         }
 
-        // =======================================
-        // [도장판 렌더링 & 정렬 최적화]
-        // =======================================
         function renderBoards() {
             const container = document.getElementById("boards-container");
             const noResultElem = document.getElementById("no-result-msg");
             
-            // 기존 카드 일괄 정리
             Array.from(container.children).forEach(child => {
                 if (child.id !== 'no-result-msg') child.remove();
             });
 
             const list = Object.entries(state.boards).map(([id, data]) => ({
-                id: parseInt(id, 10),
+                id: id,
                 name: data.name || `도장판 #${id}`,
                 count: Number(data.count) || 0,
                 latestTime: getLatestStampTimestamp(id, data.count)
             }));
 
-            // 정렬
             if (state.currentSortMode === 'name') {
                 list.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
             } else if (state.currentSortMode === 'stamps') {
@@ -1120,9 +1120,6 @@
             }
         }
 
-        // =======================================
-        // [도장 클릭 모달 로직]
-        // =======================================
         function openModal(boardIndex, stampIndex, activeCount) {
             state.activeEditingStamp = { boardId: boardIndex, stampIndex };
             const key = `${boardIndex}-${stampIndex}`;
@@ -1185,15 +1182,15 @@
                 closeModal();
             } catch (err) {
                 console.error("도장 정보 저장 실패:", err);
-                alert("저장 중 오류가 발생했습니다.");
+                alert("저장 중 오류가 발생했습니다: " + err.message);
             }
         }
 
-        // =======================================
-        // [관리자 도장판 추가 / 수정 / 삭제]
-        // =======================================
         async function handleAddBoard() {
-            if (!state.currentUser) return;
+            if (!state.currentUser) {
+                alert("관리자 로그인이 필요합니다.");
+                return;
+            }
 
             const name = prompt("새로 추가할 시청자 닉네임을 입력하세요:");
             if (!name || !name.trim()) return;
@@ -1201,8 +1198,10 @@
             const countStr = prompt("현재 획득한 도장 개수를 입력하세요 (0~30):", "0");
             const count = Math.min(STAMPS_PER_BOARD, Math.max(0, parseInt(countStr, 10) || 0));
 
-            const existingIds = Object.keys(state.boards).map(Number);
-            const newId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+            const numericIds = Object.keys(state.boards)
+                .map(k => parseInt(k, 10))
+                .filter(n => !isNaN(n));
+            const newId = numericIds.length > 0 ? Math.max(...numericIds) + 1 : 1;
 
             try {
                 await setDoc(doc(db, "hotclips_boards", String(newId)), {
@@ -1211,6 +1210,7 @@
                 });
             } catch (err) {
                 console.error("도장판 생성 오류:", err);
+                alert("도장판 생성 실패: " + err.message);
             }
         }
 
@@ -1230,6 +1230,7 @@
                 });
             } catch (err) {
                 console.error("도장판 수정 오류:", err);
+                alert("도장판 수정 실패: " + err.message);
             }
         }
 
@@ -1240,12 +1241,10 @@
                 await deleteDoc(doc(db, "hotclips_boards", String(id)));
             } catch (err) {
                 console.error("도장판 삭제 오류:", err);
+                alert("도장판 삭제 실패: " + err.message);
             }
         }
 
-        // =======================================
-        // [인증 및 초기화]
-        // =======================================
         async function handleAuthToggle() {
             if (state.currentUser) {
                 await signOut(auth);
@@ -1272,7 +1271,6 @@
         function init() {
             renderGoods();
 
-            // Firebase Auth 상태 리스너
             onAuthStateChanged(auth, user => {
                 state.currentUser = user;
                 authBtn.textContent = user ? "로그아웃" : "관리자 로그인";
@@ -1282,7 +1280,6 @@
                 renderBoards();
             });
 
-            // 1. 굿즈 정보 실시간 동기화
             onSnapshot(collection(db, "hotclips_goods"), snapshot => {
                 if (snapshot.empty) {
                     state.goods = defaultGoodsList;
@@ -1298,7 +1295,6 @@
                 renderGoods();
             });
 
-            // 2. 도장판 목록 실시간 동기화
             onSnapshot(collection(db, "hotclips_boards"), snapshot => {
                 if (snapshot.empty) {
                     state.boards = defaultBoards;
@@ -1313,7 +1309,6 @@
                 renderBoards();
             });
 
-            // 3. 도장별 클립 실시간 동기화
             onSnapshot(collection(db, "hotclips_stamps"), snapshot => {
                 const newStamps = {};
                 snapshot.forEach(docSnap => { newStamps[docSnap.id] = docSnap.data(); });
@@ -1321,7 +1316,6 @@
                 renderBoards();
             });
 
-            // 이벤트 리스너 바인딩
             authBtn.addEventListener('click', handleAuthToggle);
             btnAddBoard.addEventListener('click', handleAddBoard);
             btnSaveStamp.addEventListener('click', saveStampData);
