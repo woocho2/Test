@@ -6,7 +6,7 @@
     <title>다정현 핫클립 저장소</title>
     
     <style>
-        /* [전체 페이지 배경 및 정렬 - 덜컥거림 원천 차단] */
+        /* [전체 기본 레이아웃] */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: #fff0f3;
@@ -28,10 +28,40 @@
             border: 1px solid #ffccd5;
             box-shadow: 0 8px 20px rgba(255, 117, 143, 0.12);
             box-sizing: border-box;
+            position: relative;
         }
 
         .container {
             text-align: center;
+        }
+
+        /* 상단 관리자 로그인/로그아웃 버튼 */
+        .auth-bar {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+        }
+
+        .auth-btn {
+            padding: 7px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #ffccd5;
+            background-color: #ffffff;
+            color: #c9184a;
+            transition: all 0.2s;
+        }
+
+        .auth-btn.logged-in {
+            background-color: #c9184a;
+            color: #ffffff;
+            border-color: #c9184a;
+        }
+
+        .auth-btn:hover {
+            opacity: 0.9;
         }
 
         /* [상단 배너 이미지] */
@@ -177,15 +207,15 @@
         }
 
         /* =======================================
-           [검색 및 정렬 바 - 상단 Sticky 및 배경 차단 개선]
+           [검색 및 정렬 바 - 상단 Sticky]
         ======================================= */
         .search-sort-bar-wrapper {
             position: sticky;
             top: 0;
             z-index: 100;
-            background-color: #fff0f3; /* 페이지 배경과 완벽 일치 */
+            background-color: #fff0f3;
             width: 100%;
-            padding: 16px 0; /* 위아래 넉넉하게 덮어주어 틈새 투명 차단 */
+            padding: 16px 0;
             margin-bottom: 8px;
         }
 
@@ -267,6 +297,35 @@
             color: #ffffff;
         }
 
+        /* 관리자 전용 툴바 */
+        .admin-controls-bar {
+            max-width: 1100px;
+            width: 100%;
+            margin: -10px auto 16px;
+            display: none;
+            justify-content: flex-end;
+        }
+
+        .admin-controls-bar.active {
+            display: flex;
+        }
+
+        .btn-add-board {
+            background-color: #2D3748;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-add-board:hover {
+            opacity: 0.9;
+        }
+
         #boards-container {
             max-width: 1100px;
             width: 100%;
@@ -299,12 +358,41 @@
             border-bottom: 2px solid #fff0f3;
         }
 
+        .board-title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .board-title {
             font-size: 20px;
             font-weight: bold;
             color: #c9184a;
             margin: 0;
         }
+
+        .board-admin-btns {
+            display: none;
+            gap: 6px;
+        }
+
+        .board-card.is-admin .board-admin-btns {
+            display: flex;
+        }
+
+        .btn-board-edit, .btn-board-delete {
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #e1e4e8;
+            background: #fdfdfd;
+        }
+
+        .btn-board-edit:hover { background-color: #f0f4f8; }
+        .btn-board-delete { color: #e53e3e; }
+        .btn-board-delete:hover { background-color: #fff5f5; }
 
         .board-badge {
             font-size: 13px;
@@ -391,7 +479,7 @@
         }
 
         /* =======================================
-           [상세 정보 모달 팝업]
+           [상세 정보 모달 (읽기 / 편집 모드)]
         ======================================= */
         .modal-overlay {
             display: none;
@@ -400,7 +488,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(2px);
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -410,7 +499,7 @@
 
         .modal-box {
             background: #ffffff;
-            max-width: 380px;
+            max-width: 400px;
             width: 100%;
             border-radius: 18px;
             padding: 24px;
@@ -469,7 +558,8 @@
             color: #111827;
         }
 
-        .modal-item-list {
+        /* 1) 일반 열람 뷰 */
+        .modal-view-mode {
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -499,6 +589,56 @@
             text-decoration: underline;
         }
 
+        /* 2) 관리자 편집 폼 */
+        .modal-edit-mode {
+            display: none;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .modal-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .modal-form-group label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #6b7280;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ffccd5;
+            border-radius: 8px;
+            font-size: 13.5px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .modal-input:focus {
+            border-color: #ff758f;
+        }
+
+        .modal-btn-save {
+            background-color: #c9184a;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: opacity 0.2s;
+        }
+
+        .modal-btn-save:hover {
+            opacity: 0.9;
+        }
+
         /* =======================================
            [스마트폰/모바일 최적화]
         ======================================= */
@@ -513,8 +653,19 @@
                 margin-bottom: 16px;
             }
 
+            .auth-bar {
+                top: 14px;
+                right: 14px;
+            }
+
+            .auth-btn {
+                padding: 5px 10px;
+                font-size: 11.5px;
+            }
+
             h1 {
                 font-size: 22px;
+                margin-top: 10px;
             }
 
             .search-sort-bar-wrapper {
@@ -560,6 +711,10 @@
 <body>
 
     <div class="container">
+        <div class="auth-bar">
+            <button class="auth-btn" id="authBtn">관리자 로그인</button>
+        </div>
+
         <img src="my-image.png" alt="프로필 사진" class="profile-img">
         <h1>다정현 핫클립 저장소</h1>
         <p style="margin: 0; color: #666; font-size: 15px;">원하는 도장을 클릭하여 상세 클립 정보를 확인하세요.</p>
@@ -586,31 +741,35 @@
         <div class="search-sort-bar">
             <div class="search-box-wrapper">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="nickname-search" class="search-input" placeholder="닉네임 검색" oninput="handleSearch()">
+                <input type="text" id="nickname-search" class="search-input" placeholder="닉네임 검색">
             </div>
             <div class="sort-btn-group">
-                <button class="sort-btn active" id="sort-name" onclick="setSortMode('name')">가나다순</button>
-                <button class="sort-btn" id="sort-stamps" onclick="setSortMode('stamps')">도장순</button>
-                <button class="sort-btn" id="sort-latest" onclick="setSortMode('latest')">최신순</button>
+                <button class="sort-btn active" id="sort-name">가나다순</button>
+                <button class="sort-btn" id="sort-stamps">도장순</button>
+                <button class="sort-btn" id="sort-latest">최신순</button>
             </div>
         </div>
+    </div>
+
+    <div class="admin-controls-bar" id="adminControlsBar">
+        <button class="btn-add-board" id="btnAddBoard">+ 도장판 추가</button>
     </div>
 
     <div id="boards-container">
         <div class="no-result-msg" id="no-result-msg"></div>
     </div>
 
-    <div class="modal-overlay" id="info-modal" onclick="closeModal(event)">
-        <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-overlay" id="info-modal">
+        <div class="modal-box">
             <div class="modal-header-row">
                 <div class="modal-title-group">
                     <span class="title-dot" id="modal-dot"></span>
                     <span class="modal-title-text" id="modal-title">1번 도장</span>
                 </div>
-                <button class="modal-close-icon" onclick="closeModalDirect()">✕</button>
+                <button class="modal-close-icon" id="modalCloseIcon">✕</button>
             </div>
 
-            <div class="modal-item-list">
+            <div class="modal-view-mode" id="modalViewMode">
                 <div class="modal-item">
                     <span class="modal-item-icon">🗓️</span>
                     <span id="modal-date">2026. 8. 31.</span>
@@ -624,10 +783,45 @@
                     <a href="#" id="modal-link" target="_blank" class="modal-item-link">링크 바로가기</a>
                 </div>
             </div>
+
+            <div class="modal-edit-mode" id="modalEditMode">
+                <div class="modal-form-group">
+                    <label>날짜 (예: 2026. 8. 31.)</label>
+                    <input type="text" class="modal-input" id="editStampDate" placeholder="2026. 8. 31.">
+                </div>
+                <div class="modal-form-group">
+                    <label>클립 정보/내용</label>
+                    <input type="text" class="modal-input" id="editStampText" placeholder="26.08 [반캠] 업보청산">
+                </div>
+                <div class="modal-form-group">
+                    <label>영상 링크 URL</label>
+                    <input type="text" class="modal-input" id="editStampUrl" placeholder="https://chzzk.naver.com/clips/...">
+                </div>
+                <button class="modal-btn-save" id="btnSaveStamp">저장하기</button>
+            </div>
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // 기존 캘린더와 동일한 Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBDjgnb24_rrUhuafg2jvE7UoSSNR6Z-7o",
+            authDomain: "schedule-a56bb.firebaseapp.com",
+            projectId: "schedule-a56bb",
+            storageBucket: "schedule-a56bb.firebasestorage.app",
+            messagingSenderId: "791715427873",
+            appId: "1:791715427873:web:b40e0cd6f2a6c892901560"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // 굿즈 고정 데이터
         const goodsList = [
             { id: 1, name: "다정현 손편지", desc: "보상사용 할까말까 고민되는군요", img: "gift1.png", isSpecial: false },
             { id: 2, name: "다정현 맥세이프 그립톡", desc: "이건 출시했으면 좋겠다", img: "gift2.png", isSpecial: false },
@@ -638,6 +832,87 @@
             { id: 7, name: "다정현 향수", desc: "매일 쓰는 중", img: "gift7.png", isSpecial: false },
             { id: 8, name: "다정현 장패드", desc: "이것도 출시했으면 좋겠다2222", img: "gift8.png", isSpecial: true }
         ];
+
+        const stampsPerBoard = 30;
+
+        // 초기 기본 데이터 (DB가 비어있을 때 사용)
+        const defaultBoards = {
+            1: { name: "다정현", count: 6 },
+            2: { name: "조선우", count: 5 },
+            3: { name: "우초이", count: 3 },
+            4: { name: "카티야", count: 2 },
+            5: { name: "이바", count: 1 },
+            6: { name: "일레븐", count: 0 }
+        };
+
+        const defaultStamps = {
+            "1-1": { date: "2026. 8. 31.", text: "26.08 [반캠] 업보청산", url: "https://chzzk.naver.com/clips/Jk7KNdlKcs" },
+            "1-2": { date: "2026. 8. 31.", text: "26.08 [저챗] 마음과 뇌의 싸움", url: "https://chzzk.naver.com/clips/bp72a4teVq" },
+            "1-3": { date: "2026. 8. 31.", text: "26.08 [마크] 폭탄 추격전", url: "https://chzzk.naver.com/clips/MiojMHRjVm" },
+            "1-4": { date: "2026. 8. 31.", text: "26.08 [반캠] 업보청산", url: "https://chzzk.naver.com/clips/Jk7KNdlKcs" },
+            "1-5": { date: "2026. 8. 31.", text: "26.08 [저챗] 마음과 뇌의 싸움", url: "https://chzzk.naver.com/clips/bp72a4teVq" },
+            "1-6": { date: "2026. 8. 31.", text: "26.08 [마크] 폭탄 추격전", url: "https://chzzk.naver.com/clips/MiojMHRjVm" },
+            "2-1": { date: "2026. 8. 31.", text: "26.08 [T1] 버른살의 애교", url: "https://chzzk.naver.com/clips/iam0ruNKlk" },
+            "2-2": { date: "2026. 8. 31.", text: "26.08 [T1] 버른살의 애교", url: "https://chzzk.naver.com/clips/iam0ruNKlk" },
+            "2-3": { date: "2026. 8. 31.", text: "26.08 [T1] 버른살의 애교", url: "https://chzzk.naver.com/clips/iam0ruNKlk" }
+        };
+
+        const state = {
+            currentUser: null,
+            boards: {},
+            stamps: {},
+            currentSortMode: 'name',
+            searchQuery: '',
+            activeEditingStamp: null
+        };
+
+        const authBtn = document.getElementById('authBtn');
+        const adminControlsBar = document.getElementById('adminControlsBar');
+        const btnAddBoard = document.getElementById('btnAddBoard');
+        const nicknameSearch = document.getElementById('nickname-search');
+        const sortNameBtn = document.getElementById('sort-name');
+        const sortStampsBtn = document.getElementById('sort-stamps');
+        const sortLatestBtn = document.getElementById('sort-latest');
+
+        const infoModal = document.getElementById('info-modal');
+        const modalCloseIcon = document.getElementById('modalCloseIcon');
+        const modalTitle = document.getElementById('modal-title');
+        const modalDot = document.getElementById('modal-dot');
+
+        const modalViewMode = document.getElementById('modalViewMode');
+        const modalDate = document.getElementById('modal-date');
+        const modalText = document.getElementById('modal-text');
+        const modalLink = document.getElementById('modal-link');
+
+        const modalEditMode = document.getElementById('modalEditMode');
+        const editStampDate = document.getElementById('editStampDate');
+        const editStampText = document.getElementById('editStampText');
+        const editStampUrl = document.getElementById('editStampUrl');
+        const btnSaveStamp = document.getElementById('btnSaveStamp');
+
+        function parseStampDate(dateStr) {
+            if (!dateStr || dateStr.includes("없음")) return 0;
+            const parts = dateStr.replace(/\s+/g, '').replace(/\.$/, '').split('.');
+            if (parts.length === 3) {
+                const year = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1;
+                const day = parseInt(parts[2], 10);
+                return new Date(year, month, day).getTime();
+            }
+            return 0;
+        }
+
+        function getLatestStampTimestamp(boardId, activeCount) {
+            if (activeCount <= 0) return 0;
+            for (let s = activeCount; s >= 1; s--) {
+                const key = `${boardId}-${s}`;
+                if (state.stamps[key] && state.stamps[key].date) {
+                    const time = parseStampDate(state.stamps[key].date);
+                    if (time > 0) return time;
+                }
+            }
+            return 0;
+        }
 
         function renderGoods() {
             const container = document.getElementById("goods-grid-container");
@@ -658,91 +933,62 @@
                     <h3 class="goods-name">${item.name}</h3>
                     <p class="goods-info">${item.desc}</p>
                 `;
-
                 container.appendChild(itemDiv);
             });
         }
 
-        const totalBoards = 20;
-        const stampsPerBoard = 30;
-
-        const boardNames = {
-            1: "다정현",
-            2: "조선우",
-            3: "우초이",
-            4: "카티야",
-            5: "이바",
-            6: "일레븐"
-        };
-
-        const boardActiveCounts = {
-            1: 6,
-            2: 5,
-            3: 3,
-            4: 2,
-            5: 1,
-            6: 0
-        };
-
-        const stampData = {
-            "1-1": { date: "2026. 8. 31.", text: "26.08 [반캠] 업보청산", url: "https://chzzk.naver.com/clips/Jk7KNdlKcs" },
-            "1-2": { date: "2026. 8. 31.", text: "26.08 [저챗] 마음과 뇌의 싸움", url: "https://chzzk.naver.com/clips/bp72a4teVq" },
-            "1-3": { date: "2026. 8. 31.", text: "26.08 [마크] 폭탄 추격전", url: "https://chzzk.naver.com/clips/MiojMHRjVm" },
-            "1-4": { date: "2026. 8. 31.", text: "26.08 [반캠] 업보청산", url: "https://chzzk.naver.com/clips/Jk7KNdlKcs" },
-            "1-5": { date: "2026. 8. 31.", text: "26.08 [저챗] 마음과 뇌의 싸움", url: "https://chzzk.naver.com/clips/bp72a4teVq" },
-            "1-6": { date: "2026. 8. 31.", text: "26.08 [마크] 폭탄 추격전", url: "https://chzzk.naver.com/clips/MiojMHRjVm" },
-            "2-1": { date: "2026. 8. 31.", text: "26.08 [T1] 버른살의 애교", url: "https://chzzk.naver.com/clips/iam0ruNKlk" },
-            "2-2": { date: "2026. 8. 31.", text: "26.08 [T1] 버른살의 애교", url: "https://chzzk.naver.com/clips/iam0ruNKlk" },
-            "2-3": { date: "2026. 8. 31.", text: "26.08 [T1] 버른살의 애교", url: "https://chzzk.naver.com/clips/iam0ruNKlk" }
-        };
-
-        const boardElementsMap = {};
-        let currentSortMode = 'name';
-        let searchQuery = '';
-
-        function parseStampDate(dateStr) {
-            if (!dateStr || dateStr.includes("없음")) return 0;
-            const parts = dateStr.replace(/\s+/g, '').replace(/\.$/, '').split('.');
-            if (parts.length === 3) {
-                const year = parseInt(parts[0], 10);
-                const month = parseInt(parts[1], 10) - 1;
-                const day = parseInt(parts[2], 10);
-                return new Date(year, month, day).getTime();
-            }
-            return 0;
-        }
-
-        function getLatestStampTimestamp(boardId, activeCount) {
-            if (activeCount <= 0) return 0;
-            for (let s = activeCount; s >= 1; s--) {
-                const key = `${boardId}-${s}`;
-                if (stampData[key] && stampData[key].date) {
-                    const time = parseStampDate(stampData[key].date);
-                    if (time > 0) return time;
-                }
-            }
-            return 0;
-        }
-
-        function createAllBoards() {
+        function renderBoards() {
             const container = document.getElementById("boards-container");
+            const noResultElem = document.getElementById("no-result-msg");
+            
+            // 기존 카드들 제거 (안내 메시지 제외)
+            Array.from(container.children).forEach(child => {
+                if (child.id !== 'no-result-msg') child.remove();
+            });
 
-            for (let b = 1; b <= totalBoards; b++) {
-                const name = boardNames[b] || `도장판 #${b}`;
-                const count = boardActiveCounts[b] || 0;
+            let list = Object.entries(state.boards).map(([id, data]) => ({
+                id: parseInt(id, 10),
+                name: data.name || `도장판 #${id}`,
+                count: Number(data.count) || 0,
+                latestTime: getLatestStampTimestamp(id, data.count)
+            }));
+
+            // [정렬]
+            if (state.currentSortMode === 'name') {
+                list.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+            } else if (state.currentSortMode === 'stamps') {
+                list.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'ko'));
+            } else if (state.currentSortMode === 'latest') {
+                list.sort((a, b) => b.latestTime - a.latestTime || b.count - a.count || a.name.localeCompare(b.name, 'ko'));
+            }
+
+            let visibleCount = 0;
+
+            list.forEach(item => {
+                const isMatch = !state.searchQuery || item.name.toLowerCase().includes(state.searchQuery);
+                if (!isMatch) return;
+
+                visibleCount++;
 
                 const card = document.createElement("div");
-                card.className = "board-card";
-                card.id = `board-card-${b}`;
+                card.className = `board-card ${state.currentUser ? 'is-admin' : ''}`;
+                card.id = `board-card-${item.id}`;
 
+                // 헤더 영역
                 const header = document.createElement("div");
                 header.className = "board-header";
                 header.innerHTML = `
-                    <h2 class="board-title">${name}</h2>
-                    <span class="board-badge">도장 ${count} / ${stampsPerBoard}개</span>
+                    <div class="board-title-group">
+                        <h2 class="board-title">${item.name}</h2>
+                        <div class="board-admin-btns">
+                            <button class="btn-board-edit" data-id="${item.id}">수정</button>
+                            <button class="btn-board-delete" data-id="${item.id}">삭제</button>
+                        </div>
+                    </div>
+                    <span class="board-badge">도장 ${item.count} / ${stampsPerBoard}개</span>
                 `;
-                card.appendChild(header);
 
+                // 도장 그리드 생성
                 const grid = document.createElement("div");
                 grid.className = "stamp-grid";
 
@@ -752,124 +998,284 @@
 
                     if (s % 3 === 0) btn.classList.add("special");
 
-                    if (s <= count) {
+                    if (s <= item.count) {
                         btn.classList.add("active");
                         btn.innerHTML = `<img src="Jerry.png" alt="도장" class="stamp-icon"><span class="stamp-number">${s}</span>`;
                     } else {
                         btn.innerHTML = `<span class="stamp-number">${s}</span>`;
                     }
 
-                    btn.onclick = () => openModal(b, s, count);
+                    btn.onclick = () => openModal(item.id, s, item.count);
                     grid.appendChild(btn);
                 }
 
+                card.appendChild(header);
                 card.appendChild(grid);
                 container.appendChild(card);
 
-                boardElementsMap[b] = {
-                    element: card,
-                    id: b,
-                    name: name,
-                    count: count,
-                    latestTime: getLatestStampTimestamp(b, count)
-                };
-            }
-        }
+                // 관리자 버튼 이벤트 연결
+                const btnEdit = card.querySelector('.btn-board-edit');
+                const btnDel = card.querySelector('.btn-board-delete');
 
-        function setSortMode(mode) {
-            currentSortMode = mode;
-            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`sort-${mode}`).classList.add('active');
-            updateBoardDisplay();
-        }
-
-        function handleSearch() {
-            searchQuery = document.getElementById('nickname-search').value.trim().toLowerCase();
-            updateBoardDisplay();
-        }
-
-        function updateBoardDisplay() {
-            const container = document.getElementById("boards-container");
-            const noResultElem = document.getElementById("no-result-msg");
-            
-            let list = Object.values(boardElementsMap);
-
-            if (currentSortMode === 'name') {
-                list.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
-            } else if (currentSortMode === 'stamps') {
-                list.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'ko'));
-            } else if (currentSortMode === 'latest') {
-                list.sort((a, b) => b.latestTime - a.latestTime || b.count - a.count || a.name.localeCompare(b.name, 'ko'));
-            }
-
-            let visibleCount = 0;
-
-            list.forEach(item => {
-                const isMatch = !searchQuery || item.name.toLowerCase().includes(searchQuery);
-                if (isMatch) {
-                    item.element.style.display = 'block';
-                    container.appendChild(item.element);
-                    visibleCount++;
-                } else {
-                    item.element.style.display = 'none';
+                if (btnEdit) {
+                    btnEdit.onclick = (e) => {
+                        e.stopPropagation();
+                        handleEditBoardPrompt(item.id, item.name, item.count);
+                    };
+                }
+                if (btnDel) {
+                    btnDel.onclick = (e) => {
+                        e.stopPropagation();
+                        handleDeleteBoard(item.id, item.name);
+                    };
                 }
             });
 
             if (visibleCount === 0) {
-                noResultElem.textContent = `'${searchQuery}' 검색 결과와 일치하는 도장판이 없습니다.`;
+                noResultElem.textContent = `'${state.searchQuery}' 검색 결과와 일치하는 도장판이 없습니다.`;
                 noResultElem.style.display = 'block';
             } else {
                 noResultElem.style.display = 'none';
             }
         }
 
+        // =======================================
+        // [모달 열기/닫기/저장 로직]
+        // =======================================
         function openModal(boardIndex, stampIndex, activeCount) {
+            state.activeEditingStamp = { boardId: boardIndex, stampIndex };
             const key = `${boardIndex}-${stampIndex}`;
-            const data = stampData[key] || {
+            const data = state.stamps[key] || {
                 date: "날짜 정보 없음",
                 text: "등록된 클립 정보가 없습니다.",
                 url: ""
             };
 
-            document.getElementById("modal-title").textContent = `${stampIndex}번 도장`;
-            document.getElementById("modal-date").textContent = data.date;
-            document.getElementById("modal-text").textContent = data.text;
+            modalTitle.textContent = `${stampIndex}번 도장`;
 
-            const dotElem = document.getElementById("modal-dot");
+            // 도장 점 색상
             if (stampIndex <= activeCount) {
-                dotElem.style.backgroundColor = (stampIndex % 3 === 0) ? "#b08968" : "#ff758f";
+                modalDot.style.backgroundColor = (stampIndex % 3 === 0) ? "#b08968" : "#ff758f";
             } else {
-                dotElem.style.backgroundColor = (stampIndex % 3 === 0) ? "#ede0d4" : "#ffe3ea";
+                modalDot.style.backgroundColor = (stampIndex % 3 === 0) ? "#ede0d4" : "#ffe3ea";
             }
 
-            const linkElem = document.getElementById("modal-link");
-            if (data.url) {
-                linkElem.href = data.url;
-                linkElem.textContent = data.url.replace(/^https?:\/\//, "");
-                linkElem.style.display = "inline";
+            if (state.currentUser) {
+                // [관리자 모드] 편집 폼 활성화
+                modalViewMode.style.display = 'none';
+                modalEditMode.style.display = 'flex';
+
+                editStampDate.value = data.date.includes("없음") ? "" : data.date;
+                editStampText.value = data.text.includes("없습니다") ? "" : data.text;
+                editStampUrl.value = data.url || "";
             } else {
-                linkElem.textContent = "링크 없음";
-                linkElem.removeAttribute("href");
+                // [일반 사용자 모드] 열람 뷰
+                modalViewMode.style.display = 'flex';
+                modalEditMode.style.display = 'none';
+
+                modalDate.textContent = data.date;
+                modalText.textContent = data.text;
+
+                if (data.url) {
+                    modalLink.href = data.url;
+                    modalLink.textContent = data.url.replace(/^https?:\/\//, "");
+                    modalLink.style.display = "inline";
+                } else {
+                    modalLink.textContent = "링크 없음";
+                    modalLink.removeAttribute("href");
+                }
             }
 
-            document.getElementById("info-modal").style.display = "flex";
+            infoModal.style.display = "flex";
         }
 
-        function closeModal(event) {
-            if (event.target.id === "info-modal") {
-                document.getElementById("info-modal").style.display = "none";
+        function closeModal() {
+            infoModal.style.display = "none";
+            state.activeEditingStamp = null;
+        }
+
+        async function saveStampData() {
+            if (!state.currentUser || !state.activeEditingStamp) return;
+
+            const { boardId, stampIndex } = state.activeEditingStamp;
+            const key = `${boardId}-${stampIndex}`;
+
+            const date = editStampDate.value.trim() || "날짜 정보 없음";
+            const text = editStampText.value.trim() || "등록된 클립 정보가 없습니다.";
+            const url = editStampUrl.value.trim();
+
+            try {
+                await setDoc(doc(db, "hotclips_stamps", key), { date, text, url });
+                closeModal();
+            } catch (err) {
+                console.error("도장 정보 저장 실패:", err);
+                alert("저장 중 오류가 발생했습니다.");
             }
         }
 
-        function closeModalDirect() {
-            document.getElementById("info-modal").style.display = "none";
+        // =======================================
+        // [관리자 도장판 추가/수정/삭제]
+        // =======================================
+        async function handleAddBoard() {
+            if (!state.currentUser) return;
+
+            const name = prompt("새로 추가할 시청자 닉네임을 입력하세요:");
+            if (!name || !name.trim()) return;
+
+            const countStr = prompt("현재 획득한 도장 개수를 입력하세요 (0~30):", "0");
+            const count = Math.min(30, Math.max(0, parseInt(countStr, 10) || 0));
+
+            // 새로운 번호 ID 생성
+            const existingIds = Object.keys(state.boards).map(Number);
+            const newId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+
+            try {
+                await setDoc(doc(db, "hotclips_boards", String(newId)), {
+                    name: name.trim(),
+                    count: count
+                });
+            } catch (err) {
+                console.error("도장판 생성 오류:", err);
+            }
         }
 
-        window.addEventListener("DOMContentLoaded", () => {
+        async function handleEditBoardPrompt(id, currentName, currentCount) {
+            const newName = prompt("수정할 닉네임을 입력하세요:", currentName);
+            if (newName === null) return;
+
+            const newCountStr = prompt("수정할 도장 개수를 입력하세요 (0~30):", currentCount);
+            if (newCountStr === null) return;
+
+            const count = Math.min(30, Math.max(0, parseInt(newCountStr, 10) || 0));
+
+            try {
+                await setDoc(doc(db, "hotclips_boards", String(id)), {
+                    name: newName.trim() || currentName,
+                    count: count
+                });
+            } catch (err) {
+                console.error("도장판 수정 오류:", err);
+            }
+        }
+
+        async function handleDeleteBoard(id, name) {
+            if (!confirm(`'${name}' 님의 도장판을 정말로 삭제하시겠습니까?`)) return;
+
+            try {
+                await deleteDoc(doc(db, "hotclips_boards", String(id)));
+            } catch (err) {
+                console.error("도장판 삭제 오류:", err);
+            }
+        }
+
+        // =======================================
+        // [인증 및 초기 이벤트 리스너]
+        // =======================================
+        async function handleAuthToggle() {
+            if (state.currentUser) {
+                await signOut(auth);
+            } else {
+                const email = prompt("관리자 이메일을 입력하세요:");
+                if (!email) return;
+                const password = prompt("비밀번호를 입력하세요:");
+                if (!password) return;
+
+                try {
+                    await signInWithEmailAndPassword(auth, email.trim(), password);
+                } catch (error) {
+                    alert("로그인 실패: 이메일 또는 비밀번호가 올바르지 않습니다.");
+                }
+            }
+        }
+
+        function setSortMode(mode) {
+            state.currentSortMode = mode;
+            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`sort-${mode}`).classList.add('active');
+            renderBoards();
+        }
+
+        function init() {
             renderGoods();
-            createAllBoards();
-            updateBoardDisplay();
-        });
+
+            // Firebase Auth 상태 리스너
+            onAuthStateChanged(auth, user => {
+                state.currentUser = user;
+                if (user) {
+                    authBtn.textContent = "로그아웃";
+                    authBtn.classList.add('logged-in');
+                    adminControlsBar.classList.add('active');
+                } else {
+                    authBtn.textContent = "관리자 로그인";
+                    authBtn.classList.remove('logged-in');
+                    adminControlsBar.classList.remove('active');
+                }
+                renderBoards();
+            });
+
+            // 1. 도장판 목록 실시간 동기화
+            onSnapshot(collection(db, "hotclips_boards"), snapshot => {
+                if (snapshot.empty) {
+                    // 최초 1회 기본 데이터 주입
+                    state.boards = defaultBoards;
+                    if (state.currentUser) {
+                        Object.entries(defaultBoards).forEach(([id, bData]) => {
+                            setDoc(doc(db, "hotclips_boards", id), bData);
+                        });
+                    }
+                } else {
+                    const newBoards = {};
+                    snapshot.forEach(docSnap => {
+                        newBoards[docSnap.id] = docSnap.data();
+                    });
+                    state.boards = newBoards;
+                }
+                renderBoards();
+            });
+
+            // 2. 도장별 세부 클립 정보 실시간 동기화
+            onSnapshot(collection(db, "hotclips_stamps"), snapshot => {
+                if (snapshot.empty) {
+                    state.stamps = defaultStamps;
+                    if (state.currentUser) {
+                        Object.entries(defaultStamps).forEach(([key, sData]) => {
+                            setDoc(doc(db, "hotclips_stamps", key), sData);
+                        });
+                    }
+                } else {
+                    const newStamps = {};
+                    snapshot.forEach(docSnap => {
+                        newStamps[docSnap.id] = docSnap.data();
+                    });
+                    state.stamps = newStamps;
+                }
+                renderBoards();
+            });
+
+            // 이벤트 연결
+            authBtn.addEventListener('click', handleAuthToggle);
+            btnAddBoard.addEventListener('click', handleAddBoard);
+            btnSaveStamp.addEventListener('click', saveStampData);
+
+            nicknameSearch.addEventListener('input', (e) => {
+                state.searchQuery = e.target.value.trim().toLowerCase();
+                renderBoards();
+            });
+
+            sortNameBtn.addEventListener('click', () => setSortMode('name'));
+            sortStampsBtn.addEventListener('click', () => setSortMode('stamps'));
+            sortLatestBtn.addEventListener('click', () => setSortMode('latest'));
+
+            modalCloseIcon.addEventListener('click', closeModal);
+            infoModal.addEventListener('click', (e) => {
+                if (e.target === infoModal) closeModal();
+            });
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
+            });
+        }
+
+        init();
     </script>
 </body>
 </html>
