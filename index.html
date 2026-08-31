@@ -655,12 +655,6 @@
             border-color: #ff758f;
         }
 
-        .modal-file-input {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 4px;
-        }
-
         /* 굿즈 이미지 실시간 미리보기 박스 */
         .modal-preview-wrapper {
             width: 100px;
@@ -787,16 +781,19 @@
 </head>
 <body>
 
+    <!-- 최상단 관리자 로그인/로그아웃 바 -->
     <div class="top-auth-container">
         <button class="auth-btn" id="authBtn">관리자 로그인</button>
     </div>
 
+    <!-- 1. 상단 배너 메인 보드 -->
     <div class="container">
         <img src="my-image.png" alt="프로필 사진" class="profile-img">
         <h1>다정현 핫클립 저장소</h1>
         <p style="margin: 0; color: #666; font-size: 15px;">원하는 도장을 클릭하여 상세 클립 정보를 확인하세요.</p>
     </div>
 
+    <!-- 2. 핫클립 굿즈 안내 박스 -->
     <div class="goods-card" id="goodsCardContainer">
         <div class="goods-header">
             <h2 class="goods-title">🎁 핫클립 굿즈 안내</h2>
@@ -814,6 +811,7 @@
         <p class="goods-footer-msg">항상 클립 따주셔서 정말 감사합니다 💖 작게나마 보답이 되었으면 좋겠습니다!</p>
     </div>
 
+    <!-- 3. 닉네임 검색 및 정렬 바 -->
     <div class="search-sort-bar-wrapper">
         <div class="search-sort-bar">
             <div class="search-box-wrapper">
@@ -828,14 +826,17 @@
         </div>
     </div>
 
+    <!-- 관리자 도장판 추가 툴바 -->
     <div class="admin-controls-bar" id="adminControlsBar">
         <button class="btn-add-board" id="btnAddBoard">+ 도장판 새로 만들기</button>
     </div>
 
+    <!-- 4. 도장판 목록 영역 -->
     <div id="boards-container">
         <div class="no-result-msg" id="no-result-msg"></div>
     </div>
 
+    <!-- 5. 도장 상세 정보 / 편집 모달 -->
     <div class="modal-overlay" id="info-modal">
         <div class="modal-box">
             <div class="modal-header-row">
@@ -846,6 +847,7 @@
                 <button class="modal-close-icon" id="modalCloseIcon">✕</button>
             </div>
 
+            <!-- 열람 뷰 -->
             <div class="modal-view-mode" id="modalViewMode">
                 <div class="modal-item">
                     <span class="modal-item-icon">🗓️</span>
@@ -861,6 +863,7 @@
                 </div>
             </div>
 
+            <!-- 관리자 편집 폼 -->
             <div class="modal-form" id="modalEditMode" style="display: none;">
                 <div class="modal-form-group">
                     <label>날짜 (예: 2026. 8. 31.)</label>
@@ -883,6 +886,7 @@
         </div>
     </div>
 
+    <!-- 6. 관리자 굿즈 수정 모달 -->
     <div class="modal-overlay" id="goods-edit-modal">
         <div class="modal-box">
             <div class="modal-header-row">
@@ -894,17 +898,13 @@
             </div>
 
             <div class="modal-form">
+                <!-- 이미지 미리보기 -->
                 <div class="modal-preview-wrapper">
                     <img src="" alt="미리보기" class="modal-preview-img" id="goodsPreviewImg">
                 </div>
 
                 <div class="modal-form-group">
-                    <label>컴퓨터에서 사진 선택 (선택 시 자동 업로드)</label>
-                    <input type="file" id="editGoodsFile" class="modal-file-input" accept="image/*">
-                </div>
-
-                <div class="modal-form-group">
-                    <label>또는 이미지 파일명 / 웹 URL 직접 입력</label>
+                    <label>이미지 파일명 또는 웹 URL (예: gift1.png 또는 외부 링크)</label>
                     <input type="text" class="modal-input" id="editGoodsImg" placeholder="gift1.png 또는 https://...">
                 </div>
 
@@ -921,11 +921,13 @@
         </div>
     </div>
 
+    <!-- =======================================
+         [Firebase SDK 및 스크립트]
+    ======================================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBDjgnb24_rrUhuafg2jvE7UoSSNR6Z-7o",
@@ -939,7 +941,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
         const STAMPS_PER_BOARD = 30;
 
@@ -968,8 +969,7 @@
             currentSortMode: 'name',
             searchQuery: '',
             activeEditingStamp: null,
-            activeEditingGoods: null,
-            selectedFile: null
+            activeEditingGoods: null
         };
 
         const authBtn = document.getElementById('authBtn');
@@ -1002,7 +1002,6 @@
         const goodsModalCloseIcon = document.getElementById('goodsModalCloseIcon');
         const goodsModalTitle = document.getElementById('goodsModalTitle');
         const goodsPreviewImg = document.getElementById('goodsPreviewImg');
-        const editGoodsFile = document.getElementById('editGoodsFile');
         const editGoodsImg = document.getElementById('editGoodsImg');
         const editGoodsName = document.getElementById('editGoodsName');
         const editGoodsDesc = document.getElementById('editGoodsDesc');
@@ -1079,9 +1078,6 @@
 
         function openGoodsEditModal(item) {
             state.activeEditingGoods = item;
-            state.selectedFile = null;
-            editGoodsFile.value = "";
-
             goodsModalTitle.textContent = `No.${item.id} 굿즈 정보 수정`;
             goodsPreviewImg.src = item.img || "";
             editGoodsImg.value = item.img || "";
@@ -1094,63 +1090,29 @@
         function closeGoodsEditModal() {
             goodsEditModal.style.display = "none";
             state.activeEditingGoods = null;
-            state.selectedFile = null;
         }
 
-        // 파일 선택 시 실시간 미리보기 처리
-        editGoodsFile.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                state.selectedFile = file;
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    goodsPreviewImg.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // 텍스트 URL 직접 변경 시 미리보기 반영
         editGoodsImg.addEventListener('input', (e) => {
-            if (!state.selectedFile) {
-                goodsPreviewImg.src = e.target.value.trim();
-            }
+            goodsPreviewImg.src = e.target.value.trim();
         });
 
-        // 굿즈 정보 저장 (Storage 업로드 포함)
         async function saveGoodsData() {
             if (!state.currentUser || !state.activeEditingGoods) return;
 
-            btnSaveGoods.disabled = true;
-            btnSaveGoods.textContent = "저장 중...";
+            const updatedItem = {
+                id: state.activeEditingGoods.id,
+                name: editGoodsName.value.trim() || state.activeEditingGoods.name,
+                desc: editGoodsDesc.value.trim() || state.activeEditingGoods.desc,
+                img: editGoodsImg.value.trim() || state.activeEditingGoods.img,
+                isSpecial: !!state.activeEditingGoods.isSpecial
+            };
 
             try {
-                let finalImageUrl = editGoodsImg.value.trim() || state.activeEditingGoods.img;
-
-                // 컴퓨터에서 새 파일을 올렸을 경우 Firebase Storage로 업로드
-                if (state.selectedFile) {
-                    const ext = state.selectedFile.name.split('.').pop();
-                    const storageRef = ref(storage, `goods/gift_${state.activeEditingGoods.id}_${Date.now()}.${ext}`);
-                    const uploadResult = await uploadBytes(storageRef, state.selectedFile);
-                    finalImageUrl = await getDownloadURL(uploadResult.ref);
-                }
-
-                const updatedItem = {
-                    id: state.activeEditingGoods.id,
-                    name: editGoodsName.value.trim() || state.activeEditingGoods.name,
-                    desc: editGoodsDesc.value.trim() || state.activeEditingGoods.desc,
-                    img: finalImageUrl,
-                    isSpecial: !!state.activeEditingGoods.isSpecial
-                };
-
                 await setDoc(doc(db, "hotclips_goods", String(updatedItem.id)), updatedItem);
                 closeGoodsEditModal();
             } catch (err) {
-                console.error("굿즈 저장 실패:", err);
+                console.error("굿즈 정보 저장 실패:", err);
                 alert("굿즈 저장 중 오류가 발생했습니다: " + err.message);
-            } finally {
-                btnSaveGoods.disabled = false;
-                btnSaveGoods.textContent = "굿즈 정보 저장";
             }
         }
 
