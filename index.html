@@ -319,6 +319,7 @@
             color: #ffffff;
         }
 
+        /* 관리자 도장판 추가 툴바 */
         .admin-controls-bar {
             max-width: 1100px;
             width: 100%;
@@ -654,7 +655,14 @@
             border-color: #ff758f;
         }
 
+        .modal-btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
         .modal-btn-save {
+            flex: 2;
             background-color: #c9184a;
             color: #ffffff;
             border: none;
@@ -663,12 +671,28 @@
             font-size: 14px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 6px;
             transition: opacity 0.2s;
         }
 
         .modal-btn-save:hover {
             opacity: 0.9;
+        }
+
+        .modal-btn-reset {
+            flex: 1;
+            background-color: #f7f9fa;
+            color: #e53e3e;
+            border: 1px solid #fed7d7;
+            border-radius: 8px;
+            padding: 11px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .modal-btn-reset:hover {
+            background-color: #fff5f5;
         }
 
         @media (max-width: 768px) {
@@ -824,7 +848,11 @@
                     <label>영상 링크 URL</label>
                     <input type="text" class="modal-input" id="editStampUrl" placeholder="https://chzzk.naver.com/clips/...">
                 </div>
-                <button class="modal-btn-save" id="btnSaveStamp">도장 내용 저장</button>
+                
+                <div class="modal-btn-row">
+                    <button class="modal-btn-save" id="btnSaveStamp">도장 저장</button>
+                    <button class="modal-btn-reset" id="btnResetStamp">초기화</button>
+                </div>
             </div>
         </div>
     </div>
@@ -889,15 +917,9 @@
         ];
 
         const defaultBoards = {
-            1: { name: "다정현", count: 6 },
-            2: { name: "조선우", count: 5 },
-            3: { name: "우초이", count: 3 }
-        };
-
-        const defaultStamps = {
-            "1-1": { date: "2026. 8. 31.", text: "26.08 [반캠] 업보청산", url: "https://chzzk.naver.com/clips/Jk7KNdlKcs" },
-            "1-2": { date: "2026. 8. 31.", text: "26.08 [저챗] 마음과 뇌의 싸움", url: "https://chzzk.naver.com/clips/bp72a4teVq" },
-            "1-3": { date: "2026. 8. 31.", text: "26.08 [마크] 폭탄 추격전", url: "https://chzzk.naver.com/clips/MiojMHRjVm" }
+            1: { name: "다정현", count: 0 },
+            2: { name: "조선우", count: 0 },
+            3: { name: "우초이", count: 0 }
         };
 
         const state = {
@@ -935,6 +957,7 @@
         const editStampText = document.getElementById('editStampText');
         const editStampUrl = document.getElementById('editStampUrl');
         const btnSaveStamp = document.getElementById('btnSaveStamp');
+        const btnResetStamp = document.getElementById('btnResetStamp');
 
         const goodsEditModal = document.getElementById('goods-edit-modal');
         const goodsModalCloseIcon = document.getElementById('goodsModalCloseIcon');
@@ -943,6 +966,15 @@
         const editGoodsName = document.getElementById('editGoodsName');
         const editGoodsDesc = document.getElementById('editGoodsDesc');
         const btnSaveGoods = document.getElementById('btnSaveGoods');
+
+        // [도장 유효성 검사]: 3가지 항목(날짜, 내용, 링크)이 모두 채워져 있는지 확인
+        function isStampComplete(stamp) {
+            if (!stamp) return false;
+            const hasDate = stamp.date && !stamp.date.includes("없음") && stamp.date.trim() !== "";
+            const hasText = stamp.text && !stamp.text.includes("없습니다") && stamp.text.trim() !== "";
+            const hasUrl = stamp.url && stamp.url.trim() !== "";
+            return !!(hasDate && hasText && hasUrl);
+        }
 
         function parseStampDate(dateStr) {
             if (!dateStr || dateStr.includes("없음")) return 0;
@@ -953,16 +985,28 @@
             return 0;
         }
 
-        function getLatestStampTimestamp(boardId, activeCount) {
-            if (activeCount <= 0) return 0;
-            for (let s = activeCount; s >= 1; s--) {
+        function getLatestStampTimestamp(boardId) {
+            for (let s = STAMPS_PER_BOARD; s >= 1; s--) {
                 const key = `${boardId}-${s}`;
-                if (state.stamps[key]?.date) {
-                    const time = parseStampDate(state.stamps[key].date);
+                const stamp = state.stamps[key];
+                if (isStampComplete(stamp)) {
+                    const time = parseStampDate(stamp.date);
                     if (time > 0) return time;
                 }
             }
             return 0;
+        }
+
+        // 해당 도장판에 유효하게 찍힌 도장의 총 개수 계산
+        function countValidStamps(boardId) {
+            let count = 0;
+            for (let s = 1; s <= STAMPS_PER_BOARD; s++) {
+                const key = `${boardId}-${s}`;
+                if (isStampComplete(state.stamps[key])) {
+                    count++;
+                }
+            }
+            return count;
         }
 
         function renderGoods() {
@@ -1036,12 +1080,15 @@
                 if (child.id !== 'no-result-msg') child.remove();
             });
 
-            const list = Object.entries(state.boards).map(([id, data]) => ({
-                id: String(id),
-                name: data.name || `도장판 #${id}`,
-                count: Number(data.count) || 0,
-                latestTime: getLatestStampTimestamp(id, data.count)
-            }));
+            const list = Object.entries(state.boards).map(([id, data]) => {
+                const actualCount = countValidStamps(id);
+                return {
+                    id: String(id),
+                    name: data.name || `도장판 #${id}`,
+                    count: actualCount,
+                    latestTime: getLatestStampTimestamp(id)
+                };
+            });
 
             if (state.currentSortMode === 'name') {
                 list.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
@@ -1081,15 +1128,18 @@
 
                 for (let s = 1; s <= STAMPS_PER_BOARD; s++) {
                     const btn = document.createElement("button");
-                    btn.className = `stamp-btn${s % 3 === 0 ? ' special' : ''}${s <= item.count ? ' active' : ''}`;
+                    const stampKey = `${item.id}-${s}`;
+                    const isCompleted = isStampComplete(state.stamps[stampKey]);
+
+                    btn.className = `stamp-btn${s % 3 === 0 ? ' special' : ''}${isCompleted ? ' active' : ''}`;
                     
-                    if (s <= item.count) {
+                    if (isCompleted) {
                         btn.innerHTML = `<img src="Jerry.png" alt="도장" class="stamp-icon"><span class="stamp-number">${s}</span>`;
                     } else {
                         btn.innerHTML = `<span class="stamp-number">${s}</span>`;
                     }
 
-                    btn.onclick = () => openModal(item.id, s, item.count);
+                    btn.onclick = () => openModal(item.id, s, isCompleted);
                     grid.appendChild(btn);
                 }
 
@@ -1099,7 +1149,7 @@
                 if (btnEdit) {
                     btnEdit.onclick = (e) => {
                         e.stopPropagation();
-                        handleEditBoardPrompt(item.id, item.name, item.count);
+                        handleEditBoardPrompt(item.id, item.name);
                     };
                 }
                 if (btnDel) {
@@ -1122,18 +1172,14 @@
             }
         }
 
-        function openModal(boardIndex, stampIndex, activeCount) {
+        function openModal(boardIndex, stampIndex, isCompleted) {
             state.activeEditingStamp = { boardId: String(boardIndex), stampIndex };
             const key = `${boardIndex}-${stampIndex}`;
-            const data = state.stamps[key] || {
-                date: "날짜 정보 없음",
-                text: "등록된 클립 정보가 없습니다.",
-                url: ""
-            };
+            const data = state.stamps[key] || { date: "", text: "", url: "" };
 
             modalTitle.textContent = `${stampIndex}번 도장`;
 
-            if (stampIndex <= activeCount) {
+            if (isCompleted) {
                 modalDot.style.backgroundColor = (stampIndex % 3 === 0) ? "#b08968" : "#ff758f";
             } else {
                 modalDot.style.backgroundColor = (stampIndex % 3 === 0) ? "#ede0d4" : "#ffe3ea";
@@ -1142,14 +1188,14 @@
             if (state.currentUser) {
                 modalViewMode.style.display = 'none';
                 modalEditMode.style.display = 'flex';
-                editStampDate.value = data.date.includes("없음") ? "" : data.date;
-                editStampText.value = data.text.includes("없습니다") ? "" : data.text;
+                editStampDate.value = data.date || "";
+                editStampText.value = data.text || "";
                 editStampUrl.value = data.url || "";
             } else {
                 modalViewMode.style.display = 'flex';
                 modalEditMode.style.display = 'none';
-                modalDate.textContent = data.date;
-                modalText.textContent = data.text;
+                modalDate.textContent = data.date || "날짜 정보 없음";
+                modalText.textContent = data.text || "클립 정보가 없습니다.";
 
                 if (data.url) {
                     modalLink.href = data.url;
@@ -1169,31 +1215,71 @@
             state.activeEditingStamp = null;
         }
 
+        // [도장 저장 로직: 3가지 항목 모두 필수]
         async function saveStampData() {
             if (!state.currentUser || !state.activeEditingStamp) return;
 
             const { boardId, stampIndex } = state.activeEditingStamp;
             const key = `${boardId}-${stampIndex}`;
 
-            const date = editStampDate.value.trim() || "날짜 정보 없음";
-            const text = editStampText.value.trim() || "등록된 클립 정보가 없습니다.";
+            const date = editStampDate.value.trim();
+            const text = editStampText.value.trim();
             const url = editStampUrl.value.trim();
+
+            // 3가지 중 하나라도 비어있는 경우 검증
+            if (!date || !text || !url) {
+                alert("도장을 찍으려면 날짜, 클립 정보, 영상 링크 3가지를 모두 입력해야 합니다.");
+                return;
+            }
 
             const newStampData = { date, text, url };
 
             try {
-                // 1. Firestore 저장
+                // 1. 도장 세부 정보 저장
                 await setDoc(doc(db, "hotclips_stamps", key), newStampData);
-                
-                // 2. 로컬 state 즉시 반영
                 state.stamps[key] = newStampData;
-                
-                // 3. 모달 닫기 및 화면 갱신
+
+                // 2. 도장판 유효 개수 갱신 후 boards DB 업데이트
+                const updatedCount = countValidStamps(boardId);
+                await setDoc(doc(db, "hotclips_boards", boardId), {
+                    name: state.boards[boardId]?.name || `도장판 #${boardId}`,
+                    count: updatedCount
+                }, { merge: true });
+
                 closeModal();
                 renderBoards();
             } catch (err) {
                 console.error("도장 정보 저장 실패:", err);
                 alert("저장 중 오류가 발생했습니다: " + err.message);
+            }
+        }
+
+        // [도장 초기화(삭제) 로직]
+        async function resetStampData() {
+            if (!state.currentUser || !state.activeEditingStamp) return;
+
+            const { boardId, stampIndex } = state.activeEditingStamp;
+            const key = `${boardId}-${stampIndex}`;
+
+            if (!confirm(`${stampIndex}번 도장 내용을 초기화(삭제)하시겠습니까?`)) return;
+
+            try {
+                // 1. 도장 문서 삭제
+                await deleteDoc(doc(db, "hotclips_stamps", key));
+                delete state.stamps[key];
+
+                // 2. 도장판 개수 재계산 후 업데이트
+                const updatedCount = countValidStamps(boardId);
+                await setDoc(doc(db, "hotclips_boards", boardId), {
+                    name: state.boards[boardId]?.name || `도장판 #${boardId}`,
+                    count: updatedCount
+                }, { merge: true });
+
+                closeModal();
+                renderBoards();
+            } catch (err) {
+                console.error("도장 초기화 실패:", err);
+                alert("초기화 중 오류가 발생했습니다: " + err.message);
             }
         }
 
@@ -1206,9 +1292,6 @@
             const name = prompt("새로 추가할 시청자 닉네임을 입력하세요:");
             if (!name || !name.trim()) return;
 
-            const countStr = prompt("현재 획득한 도장 개수를 입력하세요 (0~30):", "0");
-            const count = Math.min(STAMPS_PER_BOARD, Math.max(0, parseInt(countStr, 10) || 0));
-
             const numericIds = Object.keys(state.boards)
                 .map(k => parseInt(k, 10))
                 .filter(n => !isNaN(n));
@@ -1217,28 +1300,24 @@
             try {
                 await setDoc(doc(db, "hotclips_boards", String(newId)), {
                     name: name.trim(),
-                    count: count
+                    count: 0
                 });
+                alert(`'${name.trim()}' 님의 도장판이 생성되었습니다.`);
             } catch (err) {
                 console.error("도장판 생성 오류:", err);
                 alert("도장판 생성 실패: " + err.message);
             }
         }
 
-        async function handleEditBoardPrompt(id, currentName, currentCount) {
+        async function handleEditBoardPrompt(id, currentName) {
             const newName = prompt("수정할 닉네임을 입력하세요:", currentName);
-            if (newName === null) return;
-
-            const newCountStr = prompt("수정할 도장 개수를 입력하세요 (0~30):", currentCount);
-            if (newCountStr === null) return;
-
-            const count = Math.min(STAMPS_PER_BOARD, Math.max(0, parseInt(newCountStr, 10) || 0));
+            if (newName === null || !newName.trim()) return;
 
             try {
                 await setDoc(doc(db, "hotclips_boards", String(id)), {
-                    name: newName.trim() || currentName,
-                    count: count
-                });
+                    name: newName.trim(),
+                    count: countValidStamps(id)
+                }, { merge: true });
             } catch (err) {
                 console.error("도장판 수정 오류:", err);
                 alert("도장판 수정 실패: " + err.message);
@@ -1246,10 +1325,20 @@
         }
 
         async function handleDeleteBoard(id, name) {
-            if (!confirm(`'${name}' 님의 도장판을 정말로 삭제하시겠습니까?`)) return;
+            if (!confirm(`'${name}' 님의 도장판과 등록된 모든 도장 정보를 삭제하시겠습니까?`)) return;
 
             try {
+                // 1. 도장판 삭제
                 await deleteDoc(doc(db, "hotclips_boards", String(id)));
+
+                // 2. 연결된 도장 세부정보 일괄 삭제
+                for (let s = 1; s <= STAMPS_PER_BOARD; s++) {
+                    const key = `${id}-${s}`;
+                    if (state.stamps[key]) {
+                        await deleteDoc(doc(db, "hotclips_stamps", key));
+                        delete state.stamps[key];
+                    }
+                }
             } catch (err) {
                 console.error("도장판 삭제 오류:", err);
                 alert("도장판 삭제 실패: " + err.message);
@@ -1291,7 +1380,6 @@
                 renderBoards();
             });
 
-            // 1. 굿즈 정보 실시간 동기화
             onSnapshot(collection(db, "hotclips_goods"), snapshot => {
                 if (snapshot.empty) {
                     state.goods = defaultGoodsList;
@@ -1307,7 +1395,6 @@
                 renderGoods();
             });
 
-            // 2. 도장판 목록 실시간 동기화
             onSnapshot(collection(db, "hotclips_boards"), snapshot => {
                 if (snapshot.empty) {
                     state.boards = defaultBoards;
@@ -1322,24 +1409,17 @@
                 renderBoards();
             });
 
-            // 3. 도장별 클립 실시간 동기화
             onSnapshot(collection(db, "hotclips_stamps"), snapshot => {
-                if (snapshot.empty) {
-                    state.stamps = defaultStamps;
-                    if (state.currentUser) {
-                        Object.entries(defaultStamps).forEach(([key, sData]) => setDoc(doc(db, "hotclips_stamps", key), sData));
-                    }
-                } else {
-                    const newStamps = {};
-                    snapshot.forEach(docSnap => { newStamps[docSnap.id] = docSnap.data(); });
-                    state.stamps = newStamps;
-                }
+                const newStamps = {};
+                snapshot.forEach(docSnap => { newStamps[docSnap.id] = docSnap.data(); });
+                state.stamps = newStamps;
                 renderBoards();
             });
 
             authBtn.addEventListener('click', handleAuthToggle);
             btnAddBoard.addEventListener('click', handleAddBoard);
             btnSaveStamp.addEventListener('click', saveStampData);
+            btnResetStamp.addEventListener('click', resetStampData);
             btnSaveGoods.addEventListener('click', saveGoodsData);
 
             nicknameSearch.addEventListener('input', (e) => {
