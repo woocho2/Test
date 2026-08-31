@@ -655,6 +655,32 @@
             border-color: #ff758f;
         }
 
+        .modal-file-input {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        /* 굿즈 이미지 실시간 미리보기 박스 */
+        .modal-preview-wrapper {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 6px;
+            border-radius: 10px;
+            border: 1px solid #ffe5ec;
+            background: #fffafb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .modal-preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
         .modal-btn-row {
             display: flex;
             gap: 8px;
@@ -868,10 +894,20 @@
             </div>
 
             <div class="modal-form">
-                <div class="modal-form-group">
-                    <label>이미지 파일명 또는 URL (예: gift1.png 또는 외부 링크)</label>
-                    <input type="text" class="modal-input" id="editGoodsImg" placeholder="gift1.png">
+                <div class="modal-preview-wrapper">
+                    <img src="" alt="미리보기" class="modal-preview-img" id="goodsPreviewImg">
                 </div>
+
+                <div class="modal-form-group">
+                    <label>컴퓨터에서 사진 선택 (선택 시 자동 업로드)</label>
+                    <input type="file" id="editGoodsFile" class="modal-file-input" accept="image/*">
+                </div>
+
+                <div class="modal-form-group">
+                    <label>또는 이미지 파일명 / 웹 URL 직접 입력</label>
+                    <input type="text" class="modal-input" id="editGoodsImg" placeholder="gift1.png 또는 https://...">
+                </div>
+
                 <div class="modal-form-group">
                     <label>굿즈 이름</label>
                     <input type="text" class="modal-input" id="editGoodsName" placeholder="다정현 손편지">
@@ -889,6 +925,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBDjgnb24_rrUhuafg2jvE7UoSSNR6Z-7o",
@@ -902,6 +939,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
 
         const STAMPS_PER_BOARD = 30;
 
@@ -930,7 +968,8 @@
             currentSortMode: 'name',
             searchQuery: '',
             activeEditingStamp: null,
-            activeEditingGoods: null
+            activeEditingGoods: null,
+            selectedFile: null
         };
 
         const authBtn = document.getElementById('authBtn');
@@ -962,12 +1001,13 @@
         const goodsEditModal = document.getElementById('goods-edit-modal');
         const goodsModalCloseIcon = document.getElementById('goodsModalCloseIcon');
         const goodsModalTitle = document.getElementById('goodsModalTitle');
+        const goodsPreviewImg = document.getElementById('goodsPreviewImg');
+        const editGoodsFile = document.getElementById('editGoodsFile');
         const editGoodsImg = document.getElementById('editGoodsImg');
         const editGoodsName = document.getElementById('editGoodsName');
         const editGoodsDesc = document.getElementById('editGoodsDesc');
         const btnSaveGoods = document.getElementById('btnSaveGoods');
 
-        // [도장 유효성 검사]
         function isStampComplete(stamp) {
             if (!stamp) return false;
             const hasDate = stamp.date && !stamp.date.includes("없음") && stamp.date.trim() !== "";
@@ -1039,35 +1079,78 @@
 
         function openGoodsEditModal(item) {
             state.activeEditingGoods = item;
+            state.selectedFile = null;
+            editGoodsFile.value = "";
+
             goodsModalTitle.textContent = `No.${item.id} 굿즈 정보 수정`;
+            goodsPreviewImg.src = item.img || "";
             editGoodsImg.value = item.img || "";
             editGoodsName.value = item.name || "";
             editGoodsDesc.value = item.desc || "";
+
             goodsEditModal.style.display = "flex";
         }
 
         function closeGoodsEditModal() {
             goodsEditModal.style.display = "none";
             state.activeEditingGoods = null;
+            state.selectedFile = null;
         }
 
+        // 파일 선택 시 실시간 미리보기 처리
+        editGoodsFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                state.selectedFile = file;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    goodsPreviewImg.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 텍스트 URL 직접 변경 시 미리보기 반영
+        editGoodsImg.addEventListener('input', (e) => {
+            if (!state.selectedFile) {
+                goodsPreviewImg.src = e.target.value.trim();
+            }
+        });
+
+        // 굿즈 정보 저장 (Storage 업로드 포함)
         async function saveGoodsData() {
             if (!state.currentUser || !state.activeEditingGoods) return;
 
-            const updatedItem = {
-                id: state.activeEditingGoods.id,
-                name: editGoodsName.value.trim() || state.activeEditingGoods.name,
-                desc: editGoodsDesc.value.trim() || state.activeEditingGoods.desc,
-                img: editGoodsImg.value.trim() || state.activeEditingGoods.img,
-                isSpecial: !!state.activeEditingGoods.isSpecial
-            };
+            btnSaveGoods.disabled = true;
+            btnSaveGoods.textContent = "저장 중...";
 
             try {
+                let finalImageUrl = editGoodsImg.value.trim() || state.activeEditingGoods.img;
+
+                // 컴퓨터에서 새 파일을 올렸을 경우 Firebase Storage로 업로드
+                if (state.selectedFile) {
+                    const ext = state.selectedFile.name.split('.').pop();
+                    const storageRef = ref(storage, `goods/gift_${state.activeEditingGoods.id}_${Date.now()}.${ext}`);
+                    const uploadResult = await uploadBytes(storageRef, state.selectedFile);
+                    finalImageUrl = await getDownloadURL(uploadResult.ref);
+                }
+
+                const updatedItem = {
+                    id: state.activeEditingGoods.id,
+                    name: editGoodsName.value.trim() || state.activeEditingGoods.name,
+                    desc: editGoodsDesc.value.trim() || state.activeEditingGoods.desc,
+                    img: finalImageUrl,
+                    isSpecial: !!state.activeEditingGoods.isSpecial
+                };
+
                 await setDoc(doc(db, "hotclips_goods", String(updatedItem.id)), updatedItem);
                 closeGoodsEditModal();
             } catch (err) {
-                console.error("굿즈 정보 저장 실패:", err);
+                console.error("굿즈 저장 실패:", err);
                 alert("굿즈 저장 중 오류가 발생했습니다: " + err.message);
+            } finally {
+                btnSaveGoods.disabled = false;
+                btnSaveGoods.textContent = "굿즈 정보 저장";
             }
         }
 
@@ -1214,7 +1297,6 @@
             state.activeEditingStamp = null;
         }
 
-        // [도장 저장 로직: 3가지 필수 입력 + 앞 번호 도장 완료 여부 검증]
         async function saveStampData() {
             if (!state.currentUser || !state.activeEditingStamp) return;
 
@@ -1230,7 +1312,6 @@
                 return;
             }
 
-            // [순차 검증] 1번 도장이 아니면, 바로 이전 번호(stampIndex - 1) 도장이 완료되어 있는지 확인
             if (stampIndex > 1) {
                 const prevKey = `${boardId}-${stampIndex - 1}`;
                 if (!isStampComplete(state.stamps[prevKey])) {
@@ -1259,14 +1340,12 @@
             }
         }
 
-        // [도장 초기화(삭제) 로직: 뒤 번호 도장 존재 여부 검증]
         async function resetStampData() {
             if (!state.currentUser || !state.activeEditingStamp) return;
 
             const { boardId, stampIndex } = state.activeEditingStamp;
             const key = `${boardId}-${stampIndex}`;
 
-            // [순차 초기화 검증] 뒷 번호(stampIndex + 1) 도장이 이미 찍혀 있다면 중간 삭제 방지
             if (stampIndex < STAMPS_PER_BOARD) {
                 const nextKey = `${boardId}-${stampIndex + 1}`;
                 if (isStampComplete(state.stamps[nextKey])) {
